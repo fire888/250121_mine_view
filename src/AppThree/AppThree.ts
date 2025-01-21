@@ -6,7 +6,7 @@ import { Studio } from './Studio.ts'
 import { ControlsOrbit } from './Orbit.ts'
 import { MeshBuilder } from './MeshBuilder.ts'
 
-export class ThreeApp {
+export class AppThree {
     async init (containerDomClassName: string) {
         const fileData = await loadXMLFile(xmlFileSrc)
         const tiker = new Ticker()

@@ -1,9 +1,9 @@
 import React, { useRef, useEffect } from 'react'
 import './ComponentThree.css'
-import { ThreeApp } from '../ThreeApp/ThreeApp.ts'
+import { AppThree } from '../AppThree/AppThree.ts'
 
 const classNameThreeContainer = "three-viewer"
-let viewer: ThreeApp | null = null 
+let viewer: AppThree | null = null 
 
 export const ComponentThree = () => {
     const contRef = useRef(null)
@@ -11,7 +11,7 @@ export const ComponentThree = () => {
         if (viewer) {
             return;
         }
-        viewer = new ThreeApp()
+        viewer = new AppThree()
         viewer.init(classNameThreeContainer).then()
 	  }, [])
     return (<div className={classNameThreeContainer} ref={contRef}></div>)
