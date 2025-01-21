@@ -59,7 +59,7 @@ export class MeshBuilder {
         this.mesh.add(m)
     }
 
-    _calculateBounds () {
+    private _calculateBounds () {
         const graph = this.graph
         for (let key in graph.Nodes) {
             const [X, Y, Z] = graph.Nodes[key].pos
@@ -96,7 +96,7 @@ export class MeshBuilder {
         }
     }
 
-    _createLine (v: number[], color: [number, number, number]) {
+    private _createLine (v: number[], color: [number, number, number]) {
         const geometry = new THREE.BufferGeometry()
         const vF32 = new Float32Array(v)
         geometry.setAttribute('position', new THREE.BufferAttribute(vF32, 3))
@@ -126,7 +126,7 @@ export class MeshBuilder {
         }
     }  
 
-    _createLabel ({ 
+    private _createLabel ({ 
         text, 
         color, 
         colorBack = null, 

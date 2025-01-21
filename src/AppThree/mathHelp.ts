@@ -2,7 +2,7 @@ import * as THREE from 'three'
 import { TUNNEL_DIAMETER, TUNNEL_DIAMETER_QUALITY_N } from './CONSTANTS.ts'
 
 type A3 = [number, number, number]
-type VPolygon = number[18]
+type VPolygon = number[]
 
 const componentToHex = (c: number): string => {
     c *= 256
@@ -42,17 +42,33 @@ const N = TUNNEL_DIAMETER_QUALITY_N
 const vS = new THREE.Vector3()
 const vE = new THREE.Vector3()
 const defaultDir = new THREE.Vector3(1, 0, 0)
+
+
+/** 
+  стартовый профиль
+        |
+        |
+         \
+          \_____
+*/
 const S: number[] = [
-    -W * .5,   0,    0,
-    -W * .5,   0,    W * .5,
-    0,    0,    W,
+    -W * .5, 0, 0,
+    -W * .5, 0, W * .5,
+    0, 0, W,
 ]
+/**
+  завершающий профиль
+         |
+         |
+        /
+  _____/
+ 
+*/
 const E: number[] = [
     0, 0, W,
     W * .5, 0, W * .5,
     W * .5, 0, 0,
 ]
-
 export const createTunnel = ({ v1, v2 }: { v1: A3, v2: A3 }): number[] => {
     vS.fromArray(v1)
     vE.fromArray(v2)
@@ -61,8 +77,18 @@ export const createTunnel = ({ v1, v2 }: { v1: A3, v2: A3 }): number[] => {
     const eCopy = [...E]
     translateVertices(eCopy, l, 0, 0)
 
+    /*
+      профиль по длине тоннеля
+
+       |                                               |
+       |                                               |
+        \                                             /
+          \__________________________________________/
+
+    */
     const profile = [...S, ...eCopy]
 
+    /** создание копий профиля и вращение их вокруг оси */
     const profiles: number[][] = []
     for (let i = 0; i < N; ++i) {
         const a = i / N * Math.PI * 2
@@ -76,6 +102,7 @@ export const createTunnel = ({ v1, v2 }: { v1: A3, v2: A3 }): number[] => {
         profiles.push(p)
     }
 
+    /** заливка профилей полигонами */
     const v: number[] = [] 
     for (let i = 0; i < profiles.length; ++i) {
         const prev = profiles[i - 1] 
@@ -95,61 +122,14 @@ export const createTunnel = ({ v1, v2 }: { v1: A3, v2: A3 }): number[] => {
         }
     }
 
-    // const sX = 0
-    // const eX = l  
-    // const v = [
-    //     // bottom
-    //     ...createPolygon(
-    //         [sX, -W, W],
-    //         [eX, -W, W],
-    //         [eX, -W, -W],
-    //         [sX, -W, -W],
-    //     ),
-    //     // z-
-    //     ...createPolygon(
-    //         [sX, -W, -W],
-    //         [eX, -W, -W],
-    //         [eX, W, -W],
-    //         [sX, W, -W],
-    //     ),
-    //     // z+
-    //     ...createPolygon(
-    //         [eX, -W, W],
-    //         [sX, -W, W],
-    //         [sX, W, W],
-    //         [eX, W, W],
-    //     ),
-    //     // top
-    //     ...createPolygon(
-    //         [sX, W, -W],
-    //         [eX, W, -W],
-    //         [eX, W, W],
-    //         [sX, W, W],
-    //     ),
-    //     // start cap
-    //     ...createPolygon(
-    //         [sX, -W, W],
-    //         [sX, -W, -W],
-    //         [sX, W, -W],
-    //         [sX, W, W],
-    //     ),
-    //     // end cap
-    //     ...createPolygon(
-    //         [eX, -W, -W],
-    //         [eX, -W, W],
-    //         [eX, W, W],
-    //         [eX, W, -W],
-    //     )
-    // ]
-
-    // rotate tunnel
+    /** поворот получившихся полигонов в нужную сторону */
     vE.sub(vS)
     vE.normalize()
     const q = new THREE.Quaternion().setFromUnitVectors(defaultDir, vE)
     const m = new THREE.Matrix4().makeRotationFromQuaternion(q)
     applyMatrixToArray(m, v)
 
-    // move tunnel
+    /** сдвиг получившихся полигонов в стартовую координату */
     const m1 = new THREE.Matrix4().makeTranslation(...v1)
     applyMatrixToArray(m1, v)
 

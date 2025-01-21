@@ -1,7 +1,7 @@
 export class Ticker {
     isRunning = false
-    _updates: { (t: number): void }[] = []
-    _oldTime = Date.now()
+    private _updates: { (t: number): void }[] = []
+    private _oldTime = Date.now()
 
     start () {
         this._oldTime = Date.now()

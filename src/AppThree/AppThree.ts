@@ -19,6 +19,7 @@ export class AppThree {
         meshBuilder.init()
         studio.add(meshBuilder.mesh)
         meshBuilder.setGraph(graph)
+        /** нарисовать туннели */
         meshBuilder.drawTunnels()
         /** нарисовать линии между узлами */
         // meshBuilder.drawLines()
