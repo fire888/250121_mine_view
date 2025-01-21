@@ -1,0 +1,6 @@
+export const MULTIPLE_ALL_COORDS = 0.001 
+export const TUNNEL_DIAMETER = 3 * MULTIPLE_ALL_COORDS
+export const TUNNEL_DIAMETER_QUALITY_N = 16
+export const TUNNEL_MATERIAL_PROPS = {
+    color: 0x99aaff, 
+}
