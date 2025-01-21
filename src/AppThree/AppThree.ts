@@ -18,7 +18,12 @@ export class AppThree {
         const meshBuilder = new MeshBuilder()
         meshBuilder.init()
         studio.add(meshBuilder.mesh)
-        meshBuilder.buildByData(graph)
+        meshBuilder.setGraph(graph)
+        meshBuilder.drawTunnels()
+        /** нарисовать линии между узлами */
+        // meshBuilder.drawLines()
+        /** нарисовать метки с выводом ай-ди узлов */
+        // meshBuilder.drawLabels()
         studio.camera.position.set(meshBuilder.xCenter, meshBuilder.yCenter, meshBuilder.zMax + meshBuilder.zW * .3)
         studio.cameraLookAt(meshBuilder.xCenter, meshBuilder.yCenter, meshBuilder.zCenter)
         const controls = new ControlsOrbit()

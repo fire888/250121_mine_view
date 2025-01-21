@@ -17,6 +17,7 @@ export class MeshBuilder {
     xW: number = 0 
     yW: number = 0 
     zW: number = 0
+    graph: Graph
 
     init () {
         this.mesh = new THREE.Object3D() 
@@ -24,16 +25,13 @@ export class MeshBuilder {
 
     destroy () {}
 
-    buildByData (graph: Graph) {
-        console.log(graph)
-        this._calculateBounds(graph)
-        // this._createLines(graph)
-        // this._createLabels(graph)
-        this._createTunnels(graph)
+    setGraph (graph: Graph) {
+        this.graph = graph
+        this._calculateBounds()
     }
 
-
-    _createTunnels (graph: Graph) {
+    drawTunnels () {
+        const graph = this.graph
         const v: number[] = []
 
         for (let key in graph.Sections) {
@@ -47,8 +45,8 @@ export class MeshBuilder {
                 v2: graph.Nodes[EndNodeId].pos,
             }
 
-            const vR = MATH_HELPS.createTunnel(geomData)
-            v.push(...vR)
+            const _v = MATH_HELPS.createTunnel(geomData)
+            v.push(..._v)
         }
 
         const material = new THREE.MeshPhongMaterial(TUNNEL_MATERIAL_PROPS)
@@ -61,7 +59,8 @@ export class MeshBuilder {
         this.mesh.add(m)
     }
 
-    _calculateBounds (graph: Graph) {
+    _calculateBounds () {
+        const graph = this.graph
         for (let key in graph.Nodes) {
             const [X, Y, Z] = graph.Nodes[key].pos
             if (X < this.xMin) this.xMin = X
@@ -72,15 +71,16 @@ export class MeshBuilder {
             if (Z > this.zMax) this.zMax = Z
         }
 
-        this.xW = Math.abs(this.xMax - this.xMin) * .5
-        this.yW = Math.abs(this.yMax - this.yMin) * .5
-        this.zW = Math.abs(this.zMax - this.zMin) * .5
+        this.xW = Math.abs(this.xMax - this.xMin)
+        this.yW = Math.abs(this.yMax - this.yMin)
+        this.zW = Math.abs(this.zMax - this.zMin)
         this.xCenter = this.xMin + (this.xMax - this.xMin) * .5
         this.yCenter = this.yMin + (this.yMax - this.yMin) * .5
         this.zCenter = this.zMin + (this.zMax - this.zMin) * .5
     }
 
-    _createLines (graph) {
+    drawLines () {
+        const graph = this.graph
         for (let key in graph.Sections) {
             const { StartNodeId, EndNodeId } = graph.Sections[key]
 
@@ -105,7 +105,8 @@ export class MeshBuilder {
         this.mesh.add(line)
     }
 
-    _createLabels (graph: Graph) {
+    drawLabels () {
+        const graph = this.graph
         const nodeGeom = new THREE.BoxGeometry(2, 2, 2)
         const nodeMat = new THREE.MeshBasicMaterial({ color: 0xfffff })
         for (let key in graph.Nodes) {
@@ -138,6 +139,11 @@ export class MeshBuilder {
     }) {
         const canvas = document.createElement( 'canvas' );
         const ctx = canvas.getContext( '2d' );
+
+        if (!ctx) {
+            return;
+        }
+
         canvas.width = 128 * (text.length * .5);
         canvas.height = 128;
 
