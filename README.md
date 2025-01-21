@@ -9,5 +9,9 @@
 Текущая версия Nodejs: `20.18.0`.  
 Чтобы запустить приложениие нужно в терминале набрать: 
 ```
+git init
+git remote add origin https://github.com/fire888/250121_mine_view.git
+git pull origin master
+npm install
 npm run start  
 ```
