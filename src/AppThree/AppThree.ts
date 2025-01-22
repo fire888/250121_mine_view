@@ -10,7 +10,6 @@ const d = document.createElement('div')
 d.innerText = '|'
 d.classList.add('popup')
 document.body.appendChild(d)
-console.log('KKK')
 
 export class AppThree {
     async init (containerDomClassName: string) {
@@ -29,7 +28,7 @@ export class AppThree {
         meshBuilder.setGraph(graph)
         /** нарисовать туннели */
         meshBuilder.drawTunnels()
-        /** кидаем меши для наведения курсора в специальный массив */
+        /** кладем меши для наведения курсора в специальный массив */
         studio.setMeshForClick(meshBuilder.getMeshesForClick())
         /** вешаем коллбэк на меши под курсором */ 
         studio.setCbOnFocus((Id: number | null): void => { 
