@@ -1,4 +1,5 @@
 import * as THREE from 'three'
+import './Studio.css'
 
 export class Studio {
     containerDom: HTMLElement
@@ -14,8 +15,10 @@ export class Studio {
     private _cbsOnMouseOver: ((val: number | null) => void)[] = []
     private _currentMeshIdMouseOver: number | null = null
 
-    init (containerDomClassName: string) {
-        this.containerDom = document.querySelector(`.${containerDomClassName}`)
+    init () {
+        this.containerDom = document.createElement('div')
+        this.containerDom.classList.add('three-viewer')
+
         this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, .001, 100000)
         this.camera.position.set(0, 0, 500)
         this.camera.lookAt(0, 0, 0)
@@ -42,6 +45,11 @@ export class Studio {
         window.addEventListener('pointerdown', this._onPointeDown.bind(this))
 
         this.render()
+    }
+
+    setDomParent (elem: HTMLElement) {
+        elem.appendChild(this.containerDom)
+        this._onWindowResize()
     }
 
     render () {
