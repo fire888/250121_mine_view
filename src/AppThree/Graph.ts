@@ -120,4 +120,15 @@ export class Graph {
             }
         }
     }
+
+    getMessageById (Id: number): string {
+        let str = 'Section:'
+        for (let key in this.Sections[Id]) {
+            if (key === 'Guid') {
+                continue;
+            }
+            str += ` ${key}: ${this.Sections[Id][key]}`
+        }
+        return str
+    }
 }

@@ -4,11 +4,15 @@ export class Studio {
     containerDom: HTMLElement
     camera: THREE.PerspectiveCamera
     scene: THREE.Scene
-    fog: THREE.Fog
-    hemiLight: THREE.HemisphereLight
-    dirLight: THREE.DirectionalLight
-    renderer: THREE.WebGLRenderer
-    spotLight: THREE.SpotLight
+    private _renderer: THREE.WebGLRenderer
+    private _hemiLight: THREE.HemisphereLight
+    private _dirLight: THREE.DirectionalLight
+
+    private _meshesForClick: THREE.Mesh[] = []
+    private _raycaster: THREE.Raycaster = new THREE.Raycaster()
+    private _pointer: THREE.Vector2 = new THREE.Vector2()
+    private _cbsOnMouseOver: ((val: number | null) => void)[] = []
+    private _currentMeshIdMouseOver: number | null = null
 
     init (containerDomClassName: string) {
         this.containerDom = document.querySelector(`.${containerDomClassName}`)
@@ -18,34 +22,69 @@ export class Studio {
 
         this.scene = new THREE.Scene()
 
-        this.hemiLight = new THREE.HemisphereLight(0x48534a, 0xffffff, 3)
-        this.hemiLight.position.set( 0, 20, 0 )
-        this.scene.add(this.hemiLight)
+        this._hemiLight = new THREE.HemisphereLight(0x48534a, 0xffffff, 3)
+        this._hemiLight.position.set( 0, 20, 0 )
+        this.scene.add(this._hemiLight)
 
-        this.dirLight = new THREE.DirectionalLight(0xffffff, 5)
-        this.dirLight.position.set(-3, 10, 2)
-        this.scene.add(this.dirLight)
+        this._dirLight = new THREE.DirectionalLight(0xffffff, 5)
+        this._dirLight.position.set(-3, 10, 2)
+        this.scene.add(this._dirLight)
 
-        this.renderer = new THREE.WebGLRenderer({ antialias: true })
-        this.renderer.setPixelRatio(window.devicePixelRatio)
-        this.renderer.setSize(window.innerWidth, window.innerHeight)
-        this.containerDom.appendChild(this.renderer.domElement)
+        this._renderer = new THREE.WebGLRenderer({ antialias: true })
+        this._renderer.setPixelRatio(window.devicePixelRatio)
+        this._renderer.setSize(window.innerWidth, window.innerHeight)
+        this.containerDom.appendChild(this._renderer.domElement)
 
-        window.addEventListener('resize', this.onWindowResize.bind(this))
-        this.onWindowResize()
+        window.addEventListener('resize', this._onWindowResize.bind(this))
+        this._onWindowResize()
+
+        window.addEventListener('pointermove', this._onPointerMove.bind(this))
+        window.addEventListener('pointerdown', this._onPointeDown.bind(this))
 
         this.render()
     }
 
     render () {
-        this.renderer.render(this.scene, this.camera)
+        this._raycaster.setFromCamera(this._pointer, this.camera)
+        const intersects = this._raycaster.intersectObjects(this._meshesForClick, true)
+        const result = intersects[0] 
+            ? intersects[0].object.userData.Id
+            : null
+
+        if (result !== this._currentMeshIdMouseOver) {
+            this._currentMeshIdMouseOver = result
+            this._cbsOnMouseOver.forEach(cb => cb(result))
+        }
+
+        this._renderer.render(this.scene, this.camera)
     }
 
-    onWindowResize() {
+    private _onWindowResize() {
         this.camera.aspect = window.innerWidth / window.innerHeight
         this.camera.updateProjectionMatrix()
-        this.renderer.setSize(window.innerWidth, window.innerHeight)
+        this._renderer.setSize(window.innerWidth, window.innerHeight)
     }
+
+    private _onPointerMove (e: PointerEvent) {
+        this._pointer.x = ( e.clientX / window.innerWidth ) * 2 - 1
+        this._pointer.y = - ( e.clientY / window.innerHeight ) * 2 + 1
+    }
+
+    private _onPointeDown (e: PointerEvent) {
+        this._pointer.x = ( e.clientX / window.innerWidth ) * 2 - 1
+        this._pointer.y = - ( e.clientY / window.innerHeight ) * 2 + 1
+
+        this._raycaster.setFromCamera(this._pointer, this.camera)
+        const intersects = this._raycaster.intersectObjects(this._meshesForClick, true)
+        const result = intersects[0] 
+            ? intersects[0].object.userData.Id
+            : null
+
+        if (result !== this._currentMeshIdMouseOver) {
+            this._currentMeshIdMouseOver = result
+            this._cbsOnMouseOver.forEach(cb => cb(result))
+        }
+    } 
 
     add (m: THREE.Object3D) {
         this.scene.add(m)
@@ -63,4 +102,17 @@ export class Studio {
     cameraLookAt (x: number, y: number, z: number) {
         this.camera.lookAt(x, y, z)
     }
+
+    setMeshForClick (e: THREE.Mesh | THREE.Mesh[]) {
+        if (Array.isArray(e)) {
+            this._meshesForClick.push(...e)
+        } else {
+            this._meshesForClick.push(e)
+        } 
+    }
+
+    setCbOnFocus (cb: (val: number | null) => void): void {
+        this._cbsOnMouseOver.push(cb)
+    }
+
 }

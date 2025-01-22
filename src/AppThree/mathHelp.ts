@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import { TUNNEL_DIAMETER, TUNNEL_DIAMETER_QUALITY_N } from './CONSTANTS.ts'
+import * as CONSTANTS from './CONSTANTS.ts'
 
 type A3 = [number, number, number]
 type VPolygon = number[]
@@ -37,13 +37,14 @@ export const createPolygon = (v0: A3, v1: A3, v2: A3, v3: A3): VPolygon => {
     return [...v0, ...v1, ...v2, ...v0, ...v2, ...v3]
 }
 
-const W = TUNNEL_DIAMETER
-const N = TUNNEL_DIAMETER_QUALITY_N
+const fillColorFace = (c: A3): number[] => [...c, ...c, ...c, ...c, ...c, ...c]
+
+const R = CONSTANTS.TUNNEL_RADIUS
+const N = CONSTANTS.TUNNEL_DIAMETER_QUALITY_N
+const COLOR = CONSTANTS.COLOR_TUNNEL
 const vS = new THREE.Vector3()
 const vE = new THREE.Vector3()
 const defaultDir = new THREE.Vector3(1, 0, 0)
-
-
 /** 
   стартовый профиль
         |
@@ -52,30 +53,28 @@ const defaultDir = new THREE.Vector3(1, 0, 0)
           \_____
 */
 const S: number[] = [
-    -W * .5, 0, 0,
-    -W * .5, 0, W * .5,
-    0, 0, W,
+    -R * .5, 0, 0,
+    -R * .5, 0, R * .5,
+    0, 0, R,
 ]
 /**
   завершающий профиль
-         |
-         |
-        /
-  _____/
- 
+             |
+             |
+            /
+      _____/
 */
 const E: number[] = [
-    0, 0, W,
-    W * .5, 0, W * .5,
-    W * .5, 0, 0,
+    0, 0, R,
+    R * .5, 0, R * .5,
+    R * .5, 0, 0,
 ]
-export const createTunnel = ({ v1, v2 }: { v1: A3, v2: A3 }): number[] => {
+export const createTunnel = (
+    { v1, v2 }: { v1: A3, v2: A3 }
+): { v: number[], c: number[], quaternion: THREE.Quaternion, len: number } => {
     vS.fromArray(v1)
     vE.fromArray(v2)
     const l = vS.distanceTo(vE)
-
-    const eCopy = [...E]
-    translateVertices(eCopy, l, 0, 0)
 
     /*
       профиль по длине тоннеля
@@ -86,6 +85,8 @@ export const createTunnel = ({ v1, v2 }: { v1: A3, v2: A3 }): number[] => {
           \__________________________________________/
 
     */
+    const eCopy = [...E]
+    translateVertices(eCopy, l, 0, 0)
     const profile = [...S, ...eCopy]
 
     /** создание копий профиля и вращение их вокруг оси */
@@ -104,6 +105,7 @@ export const createTunnel = ({ v1, v2 }: { v1: A3, v2: A3 }): number[] => {
 
     /** заливка профилей полигонами */
     const v: number[] = [] 
+    const c: number[] = []
     for (let i = 0; i < profiles.length; ++i) {
         const prev = profiles[i - 1] 
             ? profiles[i - 1] 
@@ -119,6 +121,7 @@ export const createTunnel = ({ v1, v2 }: { v1: A3, v2: A3 }): number[] => {
                     [cur[j - 3], cur[j - 2], cur[j - 1]],
                 )
             )
+            c.push(...fillColorFace(COLOR))
         }
     }
 
@@ -133,7 +136,7 @@ export const createTunnel = ({ v1, v2 }: { v1: A3, v2: A3 }): number[] => {
     const m1 = new THREE.Matrix4().makeTranslation(...v1)
     applyMatrixToArray(m1, v)
 
-    return v
+    return { v, c, len: l, quaternion: q }
 }
 
 const translateVertices = (v: number[], x: number, y: number, z: number): void => {

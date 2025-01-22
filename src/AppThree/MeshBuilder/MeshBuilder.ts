@@ -1,10 +1,16 @@
 import * as THREE from 'three'
-import { Graph } from './Graph.ts'
-import * as MATH_HELPS from './mathHelp.ts'
-import { TUNNEL_MATERIAL_PROPS } from './CONSTANTS.ts'
+import { Graph } from '../Graph.ts'
+import * as MATH_HELPS from '../mathHelp.ts'
+import { TUNNEL_MATERIAL_PROPS, COLOR_TUNNEL_FOCUS, COLOR_TUNNEL } from '../CONSTANTS.ts'
+import { Section } from './Section.ts'
+
+type SectionsData = {
+    [key: string]: Section
+}
 
 export class MeshBuilder {
     mesh: THREE.Object3D
+    tunnelsMesh: THREE.Mesh
     xMin: number = Infinity 
     xMax: number = -Infinity
     yMin: number = Infinity
@@ -18,7 +24,9 @@ export class MeshBuilder {
     yW: number = 0 
     zW: number = 0
     graph: Graph
-
+    sections: SectionsData = {}
+    private _currentSectionIdFocus: number | null = null 
+    
     init () {
         this.mesh = new THREE.Object3D() 
     }
@@ -33,6 +41,7 @@ export class MeshBuilder {
     drawTunnels () {
         const graph = this.graph
         const v: number[] = []
+        const c: number[] = []
 
         for (let key in graph.Sections) {
             const { StartNodeId, EndNodeId } = graph.Sections[key]
@@ -45,8 +54,31 @@ export class MeshBuilder {
                 v2: graph.Nodes[EndNodeId].pos,
             }
 
-            const _v = MATH_HELPS.createTunnel(geomData)
-            v.push(..._v)
+            const startIndexV = v.length
+            const startIndexC = c.length
+
+            const tunnelMathData = MATH_HELPS.createTunnel(geomData)
+            v.push(...tunnelMathData.v)
+            c.push(...tunnelMathData.c)
+
+            const endIndexV = v.length
+            const endIndexC = c.length
+
+            const section = new Section({
+                Id: +key,
+                startIndexV,
+                endIndexV,
+                startIndexC,
+                endIndexC,
+                startPos: geomData.v1,
+                endPos: geomData.v2,
+                len: tunnelMathData.len,
+                quaternion: tunnelMathData.quaternion,
+                startNodeId: StartNodeId,
+                endNodeId: EndNodeId,
+            })
+            this.mesh.add(section.meshForClick)
+            this.sections[key] = section
         }
 
         const material = new THREE.MeshPhongMaterial(TUNNEL_MATERIAL_PROPS)
@@ -54,9 +86,11 @@ export class MeshBuilder {
         const vF32 = new Float32Array(v)
         geometry.setAttribute('position', new THREE.BufferAttribute(vF32, 3))
         geometry.computeVertexNormals(true)
-        const m = new THREE.Mesh(geometry, material)
-        m.material.flatShading = true
-        this.mesh.add(m)
+        const cF32 = new Float32Array(c)
+        geometry.setAttribute('color', new THREE.BufferAttribute(cF32, 3))
+        this.tunnelsMesh = new THREE.Mesh(geometry, material)
+        this.tunnelsMesh.material.flatShading = true
+        this.mesh.add(this.tunnelsMesh)
     }
 
     private _calculateBounds () {
@@ -167,5 +201,39 @@ export class MeshBuilder {
         sprite.scale.set(5, 5, 5)
 
         this.mesh.add(sprite)
+    }
+
+    getMeshesForClick (): THREE.Mesh[] {
+        const arr: THREE.Mesh[] = []
+        for (let key in this.sections) {
+            arr.push(this.sections[key].meshForClick)
+        }
+        return arr
+    }
+
+    focusOn (Id: number | null) {
+        console.log('Id', Id)
+        if (this._currentSectionIdFocus !== null && this._currentSectionIdFocus !== Id) {
+            const { startIndexC, endIndexC } = this.sections[this._currentSectionIdFocus]
+            const { color } = this.tunnelsMesh.geometry.attributes
+            for (let i = startIndexC; i < endIndexC; i += 3) {
+                color.array[i] = COLOR_TUNNEL[0]
+                color.array[i + 1] = COLOR_TUNNEL[1]
+                color.array[i + 2] = COLOR_TUNNEL[2]
+            }
+            color.needsUpdate = true
+        }
+        if (Id !== null && this._currentSectionIdFocus !== Id) {
+            this._currentSectionIdFocus = Id
+            const { startIndexC, endIndexC } = this.sections[Id]
+            const { color } = this.tunnelsMesh.geometry.attributes
+            for (let i = startIndexC; i < endIndexC; i += 3) {
+                color.array[i] = COLOR_TUNNEL_FOCUS[0]
+                color.array[i + 1] = COLOR_TUNNEL_FOCUS[1]
+                color.array[i + 2] = COLOR_TUNNEL_FOCUS[2]
+            }
+            color.needsUpdate = true
+        }
+        this._currentSectionIdFocus = Id
     }
 }
