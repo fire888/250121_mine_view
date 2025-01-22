@@ -89,7 +89,6 @@ export class MeshBuilder {
         const cF32 = new Float32Array(c)
         geometry.setAttribute('color', new THREE.BufferAttribute(cF32, 3))
         this.tunnelsMesh = new THREE.Mesh(geometry, material)
-        this.tunnelsMesh.material.flatShading = true
         this.mesh.add(this.tunnelsMesh)
     }
 
@@ -212,7 +211,6 @@ export class MeshBuilder {
     }
 
     focusOn (Id: number | null) {
-        console.log('Id', Id)
         if (this._currentSectionIdFocus !== null && this._currentSectionIdFocus !== Id) {
             const { startIndexC, endIndexC } = this.sections[this._currentSectionIdFocus]
             const { color } = this.tunnelsMesh.geometry.attributes
