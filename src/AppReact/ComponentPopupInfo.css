@@ -1,13 +1,14 @@
 .popup-info {
     left: 0;
-    right: 0;
     top: 0;
+    height: auto;
+    word-break: normal;
     position: absolute;
     border: 1px solid rgba(255, 255, 255, 0.493);
-    z-index: 5;
+    z-index: 15;
     color: white;
     padding: 10px;
-    background-color: rgba(0, 0, 0, 0.241);
+    background-color: rgba(0, 0, 0, 0.579);
     font-family: monospace;
     white-space: pre;
     user-select: none;

@@ -6,11 +6,11 @@
 
 ## Режим разработки
 
-Текущая версия Nodejs: `20.18.0`.  
+Текущая версия Nodejs: `22.13.1`.  
 Чтобы запустить приложениие нужно в терминале набрать: 
 ```
 git clone https://github.com/fire888/250121_mine_view.git
 cd 250121_mine_view
 npm install
-npm run start  
+npm run dev 
 ```

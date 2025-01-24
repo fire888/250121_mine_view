@@ -1,0 +1,1 @@
+import './AppReact/index.tsx'

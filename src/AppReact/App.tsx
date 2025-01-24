@@ -1,29 +1,33 @@
-import React, { useState } from 'react'
 import './App.css'
-import { ComponentPopupInfo } from './ComponentPopupInfo.tsx'
 import { ComponentLoader } from './ComponentLoader.tsx'
+import ComponentPopupInfo from './ComponentPopupInfo.tsx'
+import ComponentThree from './ComponentThree.tsx'
+import ComponentHorizonsList from './ComponentHorizonsList.tsx'
+import { connect } from 'react-redux'
+import { RootState } from './store'
 
-export const containerChangeAppProps = {
-    changers:  {
-        setShowLoader: (v: boolean): void => {},
-        setShowPopupInfo: (v: boolean): void => {},
-        setTextPopupInfo: (v: string): void => {},
+interface AppProps {
+    isShowComponentLoader: boolean
+}
+
+const mapStateToProps = (state: RootState) => {
+    return {
+        isShowComponentLoader: state.threeUI.isShowComponentLoader,
     }
 }
 
-export const App = () => {
-    const [isShowLoader, setShowLoader] = useState(true)  
-    const [isShowPopupInfo, setShowPopupInfo] = useState(false)
-    const [textPopupInfo, setTextPopupInfo] = useState('|')
 
-    containerChangeAppProps.changers.setShowLoader = setShowLoader
-    containerChangeAppProps.changers.setShowPopupInfo = setShowPopupInfo
-    containerChangeAppProps.changers.setTextPopupInfo = setTextPopupInfo
-    
+const App: React.FC<AppProps> = ({ 
+    isShowComponentLoader,
+}: AppProps) => {
     return (
         <div className="App">
-            {isShowLoader && <ComponentLoader />}
-            {isShowPopupInfo && <ComponentPopupInfo textValue={textPopupInfo} />}
+            {isShowComponentLoader && <ComponentLoader />}
+            <ComponentPopupInfo />
+            <ComponentHorizonsList />
+            <ComponentThree />
         </div>
     )
 }
+
+export default connect(mapStateToProps, null)(App)

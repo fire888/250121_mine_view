@@ -1,0 +1,27 @@
+.horizons-list {
+    position: absolute;
+    z-index: 10;
+    top: 0;
+    right: 0;
+    min-width: 50px;
+    max-width: 200px;
+    display: flex;
+    padding: 2px;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    align-content: flex-start;
+    color: white;
+}
+
+.horizon-item {
+    min-width: 100px;
+    color: white;
+    padding: 5px;
+    cursor: pointer;
+    color: white;
+    padding: 0;
+    background-color: rgba(0, 0, 0, 0.241);
+    font-family: monospace;
+    white-space: pre;
+}

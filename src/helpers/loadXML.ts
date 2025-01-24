@@ -1,4 +1,4 @@
-const { XMLParser } = require("fast-xml-parser")
+import { XMLParser } from "fast-xml-parser"
 
 export const loadXMLFile = (xmlFile: string): Object => {
     return new Promise(res => {
@@ -13,5 +13,3 @@ export const loadXMLFile = (xmlFile: string): Object => {
           .then(blob => reader.readAsText(blob, "windows-1251"))
     })
 }
-
-

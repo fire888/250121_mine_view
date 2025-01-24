@@ -1,4 +1,3 @@
-import React from 'react'
 import './ComponentLoader.css'
 
 export const ComponentLoader = () => {

@@ -18,6 +18,7 @@ export class Section {
     meshForClick: THREE.Mesh
     startNodeId: number
     endNodeId: number
+    currentColor = CONSTANTS.COLOR_TUNNEL
 
     constructor ({
         Id,

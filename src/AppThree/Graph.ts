@@ -67,7 +67,7 @@ export class Graph {
                 IsMine, 
                 Name, 
                 ObjectId, 
-                Sections,
+                Sections: Sections.split(',').map((e: string) => +e),
             }  
         }
 
@@ -119,16 +119,40 @@ export class Graph {
                 ]
             }
         }
+
+        console.log(this)
     }
 
     getMessageById (Id: number): string {
-        let str = 'Section:'
-        for (let key in this.Sections[Id]) {
-            if (key === 'Guid') {
+        let str = 
+            `Section: ${ this.Sections[Id].Id } ` +
+            `StartNodeId: ${ this.Sections[Id].StartNodeId } ` +
+            `EndNodeId: ${ this.Sections[Id].EndNodeId }`
+        return str
+    }
+
+    getHorizonsNames (): string[] {
+        const arr = []
+        for (let key in this.Horizons) {
+            const { Name } = this.Horizons[key]
+            arr.push(Name)
+        }
+        return arr
+    }
+    
+    getNodesByHorizonName (name: string) {
+        let horizon: Horizon | null = null
+        for (let key in this.Horizons) {
+            if (this.Horizons[key].Name !== name) {
                 continue;
             }
-            str += ` ${key}: ${this.Sections[Id][key]}`
+            horizon = this.Horizons[key]
         }
-        return str
+
+        if (!horizon) {
+            return []
+        }
+
+        return horizon.Sections
     }
 }

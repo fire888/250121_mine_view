@@ -1,21 +1,21 @@
 import * as THREE from 'three'
-import './Studio.css'
 
 export class Studio {
     containerDom: HTMLElement
     camera: THREE.PerspectiveCamera
     scene: THREE.Scene
+    pointer: THREE.Vector2 = new THREE.Vector2()
+
     private _renderer: THREE.WebGLRenderer
     private _hemiLight: THREE.HemisphereLight
     private _dirLight: THREE.DirectionalLight
 
     private _meshesForClick: THREE.Mesh[] = []
     private _raycaster: THREE.Raycaster = new THREE.Raycaster()
-    private _pointer: THREE.Vector2 = new THREE.Vector2()
     private _cbsOnMouseOver: ((val: number | null) => void)[] = []
     private _currentMeshIdMouseOver: number | null = null
 
-    init () {
+    constructor () {
         this.containerDom = document.createElement('div')
         this.containerDom.classList.add('three-viewer')
 
@@ -25,11 +25,11 @@ export class Studio {
 
         this.scene = new THREE.Scene()
 
-        this._hemiLight = new THREE.HemisphereLight(0x48534a, 0xffffff, 3)
+        this._hemiLight = new THREE.HemisphereLight(0x48534a, 0xffffff, 6)
         this._hemiLight.position.set( 0, 20, 0 )
         this.scene.add(this._hemiLight)
 
-        this._dirLight = new THREE.DirectionalLight(0xffffff, 5)
+        this._dirLight = new THREE.DirectionalLight(0xffffff, 10)
         this._dirLight.position.set(-3, 10, 2)
         this.scene.add(this._dirLight)
 
@@ -53,7 +53,7 @@ export class Studio {
     }
 
     render () {
-        this._raycaster.setFromCamera(this._pointer, this.camera)
+        this._raycaster.setFromCamera(this.pointer, this.camera)
         const intersects = this._raycaster.intersectObjects(this._meshesForClick, true)
         const result = intersects[0] 
             ? intersects[0].object.userData.Id
@@ -74,15 +74,15 @@ export class Studio {
     }
 
     private _onPointerMove (e: PointerEvent) {
-        this._pointer.x = ( e.clientX / window.innerWidth ) * 2 - 1
-        this._pointer.y = - ( e.clientY / window.innerHeight ) * 2 + 1
+        this.pointer.x = ( e.clientX / window.innerWidth ) * 2 - 1
+        this.pointer.y = - ( e.clientY / window.innerHeight ) * 2 + 1
     }
 
     private _onPointeDown (e: PointerEvent) {
-        this._pointer.x = ( e.clientX / window.innerWidth ) * 2 - 1
-        this._pointer.y = - ( e.clientY / window.innerHeight ) * 2 + 1
+        this.pointer.x = ( e.clientX / window.innerWidth ) * 2 - 1
+        this.pointer.y = - ( e.clientY / window.innerHeight ) * 2 + 1
 
-        this._raycaster.setFromCamera(this._pointer, this.camera)
+        this._raycaster.setFromCamera(this.pointer, this.camera)
         const intersects = this._raycaster.intersectObjects(this._meshesForClick, true)
         const result = intersects[0] 
             ? intersects[0].object.userData.Id
@@ -122,5 +122,4 @@ export class Studio {
     setCbOnFocus (cb: (val: number | null) => void): void {
         this._cbsOnMouseOver.push(cb)
     }
-
 }
