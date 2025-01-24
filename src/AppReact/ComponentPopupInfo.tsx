@@ -2,7 +2,6 @@ import './ComponentPopupInfo.css'
 import { connect } from 'react-redux'
 import { RootState } from './store'
 
-
 const mapStateToProps = (state: RootState) => {
     return {
         segmentData: state.threeUI.valuePopupInfo,

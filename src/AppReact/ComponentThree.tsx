@@ -30,15 +30,14 @@ const mapDispatchToProps = (dispatch: Dispatch) => {
 
 let viewer: AppThree | null = null
 const connectorToThreeApp: any = { 
-    props: {
-}
+    props: {}
 } 
 
 interface ThreeProps {
     currentHorizon: string
     showApplication: () => void
     setValuePopupInfo: (text: string) => void
-    etHorizonsNames: (horizonsNames: string[]) => void
+    setHorizonsNames: (horizonsNames: string[]) => void
     setValuePopupCoords: (x: number, y: number) => void
 }
 

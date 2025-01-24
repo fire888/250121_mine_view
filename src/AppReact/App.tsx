@@ -16,7 +16,6 @@ const mapStateToProps = (state: RootState) => {
     }
 }
 
-
 const App: React.FC<AppProps> = ({ 
     isShowComponentLoader,
 }: AppProps) => {
