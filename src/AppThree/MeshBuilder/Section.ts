@@ -69,7 +69,7 @@ export class Section {
         }
 
         const R = CONSTANTS.TUNNEL_RADIUS
-        const d = R * 3
+        const d = R * 1.4
 
         const v = [
             // gor 
@@ -97,7 +97,6 @@ export class Section {
         this.meshForClick.userData.Id = this.Id
         this.meshForClick.userData.typeItem = Section.typeItem
         this.meshForClick.visible = false
-
         return this.meshForClick
     }
 }

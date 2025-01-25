@@ -11,15 +11,13 @@
     justify-content: flex-start;
     align-items: flex-start;
     align-content: flex-start;
-    color: white;
+    color: rgb(178, 200, 224);
 }
 
 .horizon-item {
     min-width: 100px;
-    color: white;
     padding: 5px;
     cursor: pointer;
-    color: white;
     padding: 0;
     background-color: rgba(0, 0, 0, 0.241);
     font-family: monospace;

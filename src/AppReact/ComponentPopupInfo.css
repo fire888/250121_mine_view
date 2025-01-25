@@ -4,11 +4,12 @@
     height: auto;
     word-break: normal;
     position: absolute;
-    border: 1px solid rgba(255, 255, 255, 0.493);
+    border: 1px solid rgba(255, 255, 255, 0.185);
+    border-radius: 3px;
     z-index: 15;
-    color: white;
-    padding: 10px;
-    background-color: rgba(0, 0, 0, 0.579);
+    color: rgb(172, 200, 230);
+    padding: 3px 10px;
+    background-color: rgba(0, 0, 0, 0.829);
     font-family: monospace;
     white-space: pre;
     user-select: none;
