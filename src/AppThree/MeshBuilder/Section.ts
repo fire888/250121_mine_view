@@ -63,7 +63,7 @@ export class Section {
     private _createMeshMouse () {
         if (!Section.materialMeshMouse) {
             Section.materialMeshMouse = new THREE.MeshBasicMaterial({ 
-                color: 0x000000,
+                color: 0xffff00,
                 side: THREE.DoubleSide, 
             })
         }
