@@ -15,7 +15,7 @@ export class Section {
     endPos: [number, number, number]
     len: number
     quaternion: THREE.Quaternion
-    meshForClick: THREE.Mesh
+    meshForClick: THREE.Mesh 
     startNodeId: number
     endNodeId: number
     currentColor = CONSTANTS.COLOR_TUNNEL
@@ -57,7 +57,7 @@ export class Section {
         this.endNodeId = endNodeId
         this.quaternion = quaternion
 
-        this._createMeshMouse()
+        this.meshForClick = this._createMeshMouse()
     }
 
     private _createMeshMouse () {
@@ -97,5 +97,7 @@ export class Section {
         this.meshForClick.userData.Id = this.Id
         this.meshForClick.userData.typeItem = Section.typeItem
         this.meshForClick.visible = false
+
+        return this.meshForClick
     }
 }

@@ -1,10 +1,10 @@
+// @ts-ignore
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import * as THREE from 'three'
 
 export class ControlsOrbit {
     controls: OrbitControls
     isEnabled: Boolean = false
-    constructor () {}
 
     init (camera: THREE.PerspectiveCamera, domElem: HTMLElement) {
         this.controls = new OrbitControls(camera, domElem)

@@ -1,14 +1,10 @@
 import './App.css'
-import { ComponentLoader } from './ComponentLoader.tsx'
+import ComponentLoader from './ComponentLoader.tsx'
 import ComponentPopupInfo from './ComponentPopupInfo.tsx'
 import ComponentThree from './ComponentThree.tsx'
 import ComponentHorizonsList from './ComponentHorizonsList.tsx'
-import { connect } from 'react-redux'
+import { connect, ConnectedProps } from 'react-redux'
 import { RootState } from './store'
-
-interface AppProps {
-    isShowComponentLoader: boolean
-}
 
 const mapStateToProps = (state: RootState) => {
     return {
@@ -16,9 +12,12 @@ const mapStateToProps = (state: RootState) => {
     }
 }
 
-const App: React.FC<AppProps> = ({ 
+const connector = connect(mapStateToProps, null)
+type PropsFromRedux = ConnectedProps<typeof connector>
+
+const App: React.FC<PropsFromRedux> = ({ 
     isShowComponentLoader,
-}: AppProps) => {
+}) => {
     return (
         <div className="App">
             {isShowComponentLoader && <ComponentLoader />}
@@ -29,4 +28,4 @@ const App: React.FC<AppProps> = ({
     )
 }
 
-export default connect(mapStateToProps, null)(App)
+export default connector(App)

@@ -111,7 +111,7 @@ export class Studio {
         this.camera.lookAt(x, y, z)
     }
 
-    setMeshForClick (e: THREE.Mesh | THREE.Mesh[]) {
+    setMeshForMouseOver (e: THREE.Mesh | THREE.Mesh[]) {
         if (Array.isArray(e)) {
             this._meshesForClick.push(...e)
         } else {
@@ -119,7 +119,7 @@ export class Studio {
         } 
     }
 
-    setCbOnFocus (cb: (val: number | null) => void): void {
+    setCbOnMouseOver (cb: (val: number | null) => void): void {
         this._cbsOnMouseOver.push(cb)
     }
 }

@@ -221,7 +221,7 @@ export class MeshBuilder {
     getMeshesForClick (): THREE.Mesh[] {
         const arr: THREE.Mesh[] = []
         for (let key in this.sections) {
-            arr.push(this.sections[key].meshForClick)
+            this.sections[key].meshForClick && arr.push(this.sections[key].meshForClick)
         }
         return arr
     }

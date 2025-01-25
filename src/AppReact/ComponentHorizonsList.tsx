@@ -1,14 +1,9 @@
 import './ComponentHorisonsList.css'
-import { connect } from 'react-redux'
+import { connect, ConnectedProps } from 'react-redux'
 import { Dispatch } from 'redux'
 import { TYPES_ACTIONS } from './store'
 import { RootState } from './store'
 
-interface HorizonListProps {
-    buttonsNames: string[]
-    currentButtonName: string
-    setCurrentButtonName: (v: string) => void  
-}
 
 const mapStateToProps = (state: RootState) => {
     return {
@@ -23,7 +18,10 @@ const mapDispatchToProps = (dispatch: Dispatch) => {
     }
 }
 
-const ComponentHorizonsList = (props: HorizonListProps) => {
+const connector = connect(mapStateToProps, mapDispatchToProps)
+type PropsFromRedux = ConnectedProps<typeof connector>
+
+const ComponentHorizonsList: React.FC<PropsFromRedux> = props => {
     return (
         <div className='horizons-list'>
             {props.buttonsNames.map((horizonName: string) => (
@@ -38,4 +36,4 @@ const ComponentHorizonsList = (props: HorizonListProps) => {
     )
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(ComponentHorizonsList)
+export default connector(ComponentHorizonsList)

@@ -1,8 +1,8 @@
-import { MULTIPLE_ALL_COORDS } from "./CONSTANTS.ts"
+import { MULTIPLE_ALL_COORDS } from "./CONSTANTS.ts";
 
 type A3 = [number, number, number]
 
-type Horizon = {
+interface Horizon {
     Altitude: number
     Guid: string
     Id: number
@@ -11,43 +11,51 @@ type Horizon = {
     ObjectId: number
     Sections: number[]
 }
-type Horizons = {
-    [key: string]: Horizon
+interface Horizons {
+    [Id: number]: Horizon
 }
 
-type Excavation = {
-    ExcavationType: string, 
-    Id: number,
-    Guid: string,
-    Sections: number[],
-    ObjectId: number,
-    Name: string,
+interface Excavation {
+    ExcavationType: string
+    Id: number
+    Guid: string
+    Sections: number[]
+    ObjectId: number
+    Name: string
 }
-type Excavations = {
-    [key: string]: Excavation
+interface Excavations {
+    [Id: number]: Excavation
 }
 
-type Section = {
+interface Section {
     EndNodeId: number
     Guid: string
     Id: number
     StartNodeId: number
     Thickness: number
 }
-type Sections = {
-    [key: string]: Section
+interface Sections {
+    [Id: number]: Section
 }
 
-type Node = {
-    Id: number, 
-    Guid: string, 
-    X: number, 
-    Y: number, 
-    Z: number,
-    pos: A3,
+interface Node {
+    Id: number
+    Guid: string
+    X: number
+    Y: number
+    Z: number
+    pos: A3  // координаты умноженные на MULTIPLE_ALL_COORDS
 }
-type Nodes = {
-    [key: string]: Node
+interface Nodes {
+    [Id: number]: Node
+}
+
+/** Разбирает строку вида "10,11,12" в массив чисел [10,11,12] */
+const parseSectionsString = (sections: string): number[] => {
+    return sections
+        .split(",")
+        .map((s) => parseInt(s, 10))
+        .filter((num) => !Number.isNaN(num));
 }
 
 export class Graph {
@@ -56,103 +64,142 @@ export class Graph {
     Sections: Sections = {}
     Nodes: Nodes = {}
 
-    parse (data: any) {
-        const { Horizon } = data.Graph.Horizons
-        for (let i = 0; i < Horizon.length; ++i) {
-            const { Altitude, Guid, Id, IsMine, Name, ObjectId, Sections, } = Horizon[i]
-            this.Horizons[Id] = {
-                Altitude, 
-                Guid, 
-                Id, 
-                IsMine, 
-                Name, 
-                ObjectId, 
-                Sections: Sections.split(',').map((e: string) => +e),
-            }  
+    parse(data: any) {
+        // Предполагается, что структура data выглядит так:
+        // data.Graph.Horizons.Horizon
+        // data.Graph.Excavations.Excavation
+        // data.Graph.Sections.Section
+        // data.Graph.Nodes.Node
+        const graphData = data?.Graph
+        if (!graphData) {
+            console.warn("Неверные данные: отсутствует поле 'Graph'.");
+            return
         }
 
-        const { Excavation } = data.Graph.Excavations
-        for (let i = 0; i < Excavation.length; ++i) {
-            const { Name, Id, Guid, ExcavationType, Sections, ObjectId } = Excavation[i]
-            let sections: number[]
-            if (typeof Sections === "string" && Sections.includes(',')) {
-                const nn = Sections.split(',') 
-                sections = nn.map(n => +n)
-            } else {
-                sections = [+Sections] 
+        const horizonArray = graphData.Horizons?.Horizon ?? []
+        horizonArray.forEach((horizonItem: any) => {
+            const {
+                Altitude,
+                Guid,
+                Id,
+                IsMine,
+                Name,
+                ObjectId,
+                Sections
+            } = horizonItem;
+            if (typeof Id !== "number") return;
+
+            this.Horizons[Id] = {
+                Altitude,
+                Guid,
+                Id,
+                IsMine,
+                Name,
+                ObjectId,
+                Sections: parseSectionsString(Sections),
             }
+        })
+
+        const excavationArray = graphData.Excavations?.Excavation ?? []
+        excavationArray.forEach((excavationItem: any) => {
+            const {
+                Name,
+                Id,
+                Guid,
+                ExcavationType,
+                Sections,
+                ObjectId
+            } = excavationItem;
+            if (typeof Id !== "number") return;
+
+            let sectionsParsed: number[]
+            if (typeof Sections === "string") {
+                sectionsParsed = parseSectionsString(Sections)
+            } else {
+                sectionsParsed = [Number(Sections)].filter((n) => !Number.isNaN(n));
+            }
+
             this.Excavations[Id] = {
                 Name,
                 Id,
                 Guid,
                 ExcavationType,
-                Sections: sections,
+                Sections: sectionsParsed,
                 ObjectId,
-            }  
-        }
+            };
+        });
 
-        const { Section } = data.Graph.Sections
-        for (let i = 0; i < Section.length; ++i) {
-            const { EndNodeId, Guid, Id, StartNodeId, Thickness } = Section[i]
+        const sectionArray = graphData.Sections?.Section ?? []
+        sectionArray.forEach((sectionItem: any) => {
+            const {
+                EndNodeId,
+                Guid,
+                Id,
+                StartNodeId,
+                Thickness
+            } = sectionItem;
+            if (typeof Id !== "number") return;
+
             this.Sections[Id] = {
-                EndNodeId, 
-                Guid, 
-                Id, 
-                StartNodeId, 
+                EndNodeId,
+                Guid,
+                Id,
+                StartNodeId,
                 Thickness,
             }
-        }
+        })
 
-        const { Node } = data.Graph.Nodes
-        for (let i = 0; i < Node.length; ++i) {
-            const { Id, Guid: string, X, Y, Z } = Node[i]
+        const nodeArray = graphData.Nodes?.Node ?? []
+        nodeArray.forEach((nodeItem: any) => {
+            const {
+                Id,
+                Guid,
+                X,
+                Y,
+                Z
+            } = nodeItem;
+            if (typeof Id !== "number") return;
+
             this.Nodes[Id] = {
-                Id, 
-                Guid: string, 
-                X, 
-                Y, 
+                Id,
+                Guid,
+                X,
+                Y,
                 Z,
                 pos: [
-                    X * MULTIPLE_ALL_COORDS, 
-                    Z * MULTIPLE_ALL_COORDS, 
-                    Y * MULTIPLE_ALL_COORDS
-                ]
-            }
-        }
+                    X * MULTIPLE_ALL_COORDS,
+                    Z * MULTIPLE_ALL_COORDS,
+                    Y * MULTIPLE_ALL_COORDS,
+                ],
+            };
+        });
 
-        console.log(this)
+        console.log("Graph parsed:", this);
     }
 
-    getMessageById (Id: number): string {
-        let str = 
-            `Section: ${ this.Sections[Id].Id } ` +
-            `StartNodeId: ${ this.Sections[Id].StartNodeId } ` +
-            `EndNodeId: ${ this.Sections[Id].EndNodeId }`
-        return str
+    getMessageById(Id: number): string {
+        const section = this.Sections[Id];
+        if (!section) {
+            return ``
+        }
+        return (
+            `Section: ${section.Id}, ` +
+            `StartNodeId: ${section.StartNodeId}, ` +
+            `EndNodeId: ${section.EndNodeId}`
+        )
     }
 
-    getHorizonsNames (): string[] {
-        const arr = []
-        for (let key in this.Horizons) {
-            const { Name } = this.Horizons[key]
-            arr.push(Name)
-        }
-        return arr
+    getHorizonsNames(): string[] {
+        return Object.values(this.Horizons).map((horizon) => horizon.Name);
     }
-    
-    getNodesByHorizonName (name: string) {
-        let horizon: Horizon | null = null
-        for (let key in this.Horizons) {
-            if (this.Horizons[key].Name !== name) {
-                continue;
-            }
-            horizon = this.Horizons[key]
-        }
 
+    getNodesByHorizonName(name: string): number[] {
+        const horizon = Object.values(this.Horizons).find(
+            (h) => h.Name === name
+        );
         if (!horizon) {
-            return []
+            return [];
         }
-
-        return horizon.Sections
+        return horizon.Sections;
     }
 }

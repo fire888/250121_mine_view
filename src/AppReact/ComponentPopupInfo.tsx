@@ -1,5 +1,5 @@
 import './ComponentPopupInfo.css'
-import { connect } from 'react-redux'
+import { connect, ConnectedProps } from 'react-redux'
 import { RootState } from './store'
 
 const mapStateToProps = (state: RootState) => {
@@ -10,22 +10,18 @@ const mapStateToProps = (state: RootState) => {
     }
 }
 
-interface PopupInfoProps {
-    segmentData: string
-    x: number
-    y: number
-}
+const connector = connect(mapStateToProps, null)
+type PropsFromRedux = ConnectedProps<typeof connector>
 
-const ComponentPopupInfo = (props: PopupInfoProps) => {
+const ComponentPopupInfo: React.FC<PropsFromRedux> = props => {
     return (
         <div> 
-            {props.segmentData !== '' && 
-                <div 
-                    className='popup-info'
-                    style={{ left: props.x + 'px', top: props.y - 60 + 'px' }}
-                >{props.segmentData}</div>}
+            {props.segmentData !== '' && <div 
+                className='popup-info'
+                style={{ left: props.x + 'px', top: props.y - 60 + 'px' }}
+            >{props.segmentData}</div>}
         </div>
     )
 }
 
-export default connect(mapStateToProps, null)(ComponentPopupInfo)
+export default connector(ComponentPopupInfo)
