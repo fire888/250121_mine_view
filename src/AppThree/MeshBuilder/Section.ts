@@ -57,19 +57,19 @@ export class Section {
         this.endNodeId = endNodeId
         this.quaternion = quaternion
 
-        this._createMeshMouse()
+        this.meshForClick = this._createMeshMouse()
     }
 
     private _createMeshMouse () {
         if (!Section.materialMeshMouse) {
             Section.materialMeshMouse = new THREE.MeshBasicMaterial({ 
-                color: 0xffff00,
+                color: 0x000000,
                 side: THREE.DoubleSide, 
             })
         }
 
         const R = CONSTANTS.TUNNEL_RADIUS
-        const d = R * 3
+        const d = R * 1.4
 
         const v = [
             // gor 
@@ -97,5 +97,6 @@ export class Section {
         this.meshForClick.userData.Id = this.Id
         this.meshForClick.userData.typeItem = Section.typeItem
         this.meshForClick.visible = false
+        return this.meshForClick
     }
 }

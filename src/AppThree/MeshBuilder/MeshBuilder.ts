@@ -1,7 +1,13 @@
 import * as THREE from 'three'
 import { Graph } from '../Graph.ts'
 import * as MATH_HELPS from '../mathHelp.ts'
-import { TUNNEL_MATERIAL_PROPS, COLOR_TUNNEL_FOCUS, COLOR_TUNNEL, COLOR_HORIZON_FOCUS } from '../CONSTANTS.ts'
+import { 
+    TUNNEL_MATERIAL_PROPS, 
+    COLOR_TUNNEL_FOCUS, 
+    COLOR_TUNNEL, 
+    COLOR_HORIZON_FOCUS,
+    COLOR_TUNNEL_NOT_HORIZON,
+} from '../CONSTANTS.ts'
 import { Section } from './Section.ts'
 
 type SectionsData = {
@@ -26,7 +32,6 @@ export class MeshBuilder {
     graph: Graph | null = null
     sections: SectionsData = {}
     private _currentSectionIdFocus: number | null = null
-    private _currentHorizonNodes: number[] = []
     
     init () {}
 
@@ -41,7 +46,6 @@ export class MeshBuilder {
         if (!this.graph) {
             return;
         }
-
 
         const graph = this.graph
         const v: number[] = []
@@ -240,16 +244,14 @@ export class MeshBuilder {
     }
 
     drawRedColorNodes (nodesIds: number[]) {
-        for (let i = 0; i < this._currentHorizonNodes.length; ++i) {
-            const nodeId = this._currentHorizonNodes[i]
-            if (!this.sections[nodeId]) {
-                continue
-            }
-            this.sections[nodeId].currentColor = COLOR_TUNNEL
-            const { startIndexC, endIndexC } = this.sections[nodeId]
-            this._fillSegmentByColor(startIndexC, endIndexC, this.sections[nodeId].currentColor)
-        }  
-        this._currentHorizonNodes = nodesIds     
+        if (!this.tunnelsMesh) return;
+
+        const colorNotHorizon = nodesIds.length > 0 ? COLOR_TUNNEL_NOT_HORIZON : COLOR_TUNNEL
+        for (let key in this.sections) {
+            this.sections[key].currentColor = colorNotHorizon
+        } 
+        this._fillSegmentByColor(0, this.tunnelsMesh.geometry.attributes.color.count * 3, colorNotHorizon)
+   
         for (let i = 0; i < nodesIds.length; ++i) {
             const nodeId = nodesIds[i]
             if (!this.sections[nodeId]) {
