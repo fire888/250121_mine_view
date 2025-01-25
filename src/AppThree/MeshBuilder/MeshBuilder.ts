@@ -103,11 +103,7 @@ export class MeshBuilder {
         const cF32 = new Float32Array(c)
         geometry.setAttribute('color', new THREE.BufferAttribute(cF32, 3))
         geometry.setIndex(i)
-        geometry = BufferGeometryUtils.mergeVertices(geometry)
         geometry.computeVertexNormals()
-
-
-
 
         this.tunnelsMesh = new THREE.Mesh(geometry, material)
         this.mesh.add(this.tunnelsMesh)

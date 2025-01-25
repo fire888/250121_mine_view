@@ -27,7 +27,7 @@ const appStartState: AppState = {
     valuePopupInfo: '',
     valuePopupX: 0,
     valuePopupY: 0,
-    buttonsHorizons: [],
+    buttonsHorizons: ['X'],
     currentButtonHorizon: 'X',
 }
 
@@ -57,7 +57,7 @@ const reducerThreeUI = (state: AppState = appStartState, action: AppAction) => {
     if (action.type === TYPES_ACTIONS.SET_BUTTONS_HORIZONS) {
         return ({
             ...state,
-            buttonsHorizons: ['Х', ...action.value],
+            buttonsHorizons: ['X', ...action.value],
         })
     }
 
