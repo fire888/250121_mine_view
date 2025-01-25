@@ -1,4 +1,3 @@
-import { is } from '@react-three/fiber/dist/declarations/src/core/utils'
 import { configureStore } from '@reduxjs/toolkit'
 
 interface AppState {
