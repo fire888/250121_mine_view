@@ -9,8 +9,6 @@ export class Section {
     Id: number
     startIndex: number 
     endIndex: number
-    //startIndexC: number 
-    //endIndexC: number
     startPos: [number, number, number]
     endPos: [number, number, number]
     len: number
