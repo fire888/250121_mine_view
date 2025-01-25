@@ -37,8 +37,6 @@ export const createPolygon = (v0: A3, v1: A3, v2: A3, v3: A3): VPolygon => {
     return [...v0, ...v1, ...v2, ...v0, ...v2, ...v3]
 }
 
-const fillColorFace = (c: A3): number[] => [...c, ...c, ...c, ...c, ...c, ...c]
-
 const R = CONSTANTS.TUNNEL_RADIUS
 const N = CONSTANTS.TUNNEL_DIAMETER_QUALITY_N
 const COLOR = CONSTANTS.COLOR_TUNNEL
@@ -70,8 +68,8 @@ const E: number[] = [
     R * .5, 0, 0,
 ]
 export const createTunnel = (
-    { v1, v2 }: { v1: A3, v2: A3 }
-): { v: number[], c: number[], quaternion: THREE.Quaternion, len: number } => {
+    { v1, v2, addToVertexIndex }: { v1: A3, v2: A3, addToVertexIndex: number }
+): { vertices: number[], colors: number[], indices: number[], quaternion: THREE.Quaternion, len: number } => {
     vS.fromArray(v1)
     vE.fromArray(v2)
     const l = vS.distanceTo(vE)
@@ -103,40 +101,52 @@ export const createTunnel = (
         profiles.push(p)
     }
 
-    /** заливка профилей полигонами */
-    const v: number[] = [] 
-    const c: number[] = []
+    // заливка профилей полигонами 
+    // Создание вершин, цветов и индексов
+    const vertices: number[] = []
+    const colors: number[] = []
+    const indices: number[] = []
+
+    let vertexIndex = addToVertexIndex + 1; // Счетчик для индексов вершин
+
     for (let i = 0; i < profiles.length; ++i) {
-        const prev = profiles[i - 1] 
-            ? profiles[i - 1] 
-            : profiles[profiles.length - 1]
+        const prev = profiles[i - 1] ? profiles[i - 1] : profiles[profiles.length - 1]
         const cur = profiles[i]
 
         for (let j = 3; j < prev.length; j += 3) {
-            v.push(
-                ...createPolygon(
-                    [prev[j - 3], prev[j - 2], prev[j - 1]],
-                    [prev[j], prev[j + 1], prev[j + 2]],
-                    [cur[j], cur[j + 1], cur[j + 2]],
-                    [cur[j - 3], cur[j - 2], cur[j - 1]],
-                )
-            )
-            c.push(...fillColorFace(COLOR))
+            // Добавляем вершины
+            vertices.push(
+                prev[j - 3], prev[j - 2], prev[j - 1], // v0
+                prev[j], prev[j + 1], prev[j + 2],     // v1
+                cur[j], cur[j + 1], cur[j + 2],        // v2
+                cur[j - 3], cur[j - 2], cur[j - 1]     // v3
+            );
+
+            // Добавляем цвета для каждой вершины
+            colors.push(...COLOR, ...COLOR, ...COLOR, ...COLOR)
+
+            // Добавляем индексы для двух треугольников (v0, v1, v2) и (v0, v2, v3)
+            indices.push(
+                vertexIndex, vertexIndex + 1, vertexIndex + 2, // Первый треугольник
+                vertexIndex, vertexIndex + 2, vertexIndex + 3  // Второй треугольник
+            );
+
+            vertexIndex += 4 // Увеличиваем счетчик на 4 вершины
         }
     }
 
-    /** поворот получившихся полигонов в нужную сторону */
+    // поворот получившихся полигонов в нужную сторону
     vE.sub(vS)
     vE.normalize()
     const q = new THREE.Quaternion().setFromUnitVectors(defaultDir, vE)
     const m = new THREE.Matrix4().makeRotationFromQuaternion(q)
-    applyMatrixToArray(m, v)
+    applyMatrixToArray(m, vertices)
 
-    /** сдвиг получившихся полигонов в стартовую координату */
+    // сдвиг получившихся полигонов в стартовую координату 
     const m1 = new THREE.Matrix4().makeTranslation(...v1)
-    applyMatrixToArray(m1, v)
+    applyMatrixToArray(m1, vertices)
 
-    return { v, c, len: l, quaternion: q }
+    return { vertices, colors, indices, len: l, quaternion: q }
 }
 
 const translateVertices = (v: number[], x: number, y: number, z: number): void => {

@@ -1,4 +1,5 @@
 import * as THREE from 'three'
+import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUtils.js'
 import { Graph } from '../Graph.ts'
 import * as MATH_HELPS from '../mathHelp.ts'
 import { 
@@ -50,6 +51,8 @@ export class MeshBuilder {
         const graph = this.graph
         const v: number[] = []
         const c: number[] = []
+        const i: number[] = []
+        let addToVertexIndex = -1
 
         for (let key in graph.Sections) {
             const { StartNodeId, EndNodeId } = graph.Sections[key]
@@ -60,24 +63,24 @@ export class MeshBuilder {
             const geomData = {
                 v1: graph.Nodes[StartNodeId].pos,
                 v2: graph.Nodes[EndNodeId].pos,
+                addToVertexIndex,
             }
 
-            const startIndexV = v.length
-            const startIndexC = c.length
+            const startIndex = i.length
 
             const tunnelMathData = MATH_HELPS.createTunnel(geomData)
-            v.push(...tunnelMathData.v)
-            c.push(...tunnelMathData.c)
+            v.push(...tunnelMathData.vertices)
+            c.push(...tunnelMathData.colors)
+            i.push(...tunnelMathData.indices)
 
-            const endIndexV = v.length
-            const endIndexC = c.length
+            addToVertexIndex = tunnelMathData.indices[tunnelMathData.indices.length - 1]
+
+            const endIndex = i.length
 
             const section = new Section({
                 Id: +key,
-                startIndexV,
-                endIndexV,
-                startIndexC,
-                endIndexC,
+                startIndex,
+                endIndex,
                 startPos: geomData.v1,
                 endPos: geomData.v2,
                 len: tunnelMathData.len,
@@ -89,13 +92,23 @@ export class MeshBuilder {
             this.sections[key] = section
         }
 
-        const material = new THREE.MeshPhongMaterial(TUNNEL_MATERIAL_PROPS)
-        const geometry = new THREE.BufferGeometry()
+        const material = new THREE.MeshPhongMaterial({
+            ...TUNNEL_MATERIAL_PROPS,
+            vertexColors: true,
+            flatShading: false,
+        })
+        let geometry = new THREE.BufferGeometry()
         const vF32 = new Float32Array(v)
         geometry.setAttribute('position', new THREE.BufferAttribute(vF32, 3))
-        geometry.computeVertexNormals()
         const cF32 = new Float32Array(c)
         geometry.setAttribute('color', new THREE.BufferAttribute(cF32, 3))
+        geometry.setIndex(i)
+        geometry = BufferGeometryUtils.mergeVertices(geometry)
+        geometry.computeVertexNormals()
+
+
+
+
         this.tunnelsMesh = new THREE.Mesh(geometry, material)
         this.mesh.add(this.tunnelsMesh)
     }
@@ -232,25 +245,25 @@ export class MeshBuilder {
 
     focusOn (Id: number | null) {
         if (this._currentSectionIdFocus !== null && this._currentSectionIdFocus !== Id) {
-            const { startIndexC, endIndexC, currentColor } = this.sections[this._currentSectionIdFocus]
-            this._fillSegmentByColor(startIndexC, endIndexC, currentColor)
+            const { startIndex, endIndex, currentColor } = this.sections[this._currentSectionIdFocus]
+            this._fillSegmentByColor(startIndex, endIndex, currentColor)
         }
         if (Id !== null && this._currentSectionIdFocus !== Id) {
             this._currentSectionIdFocus = Id
-            const { startIndexC, endIndexC } = this.sections[Id]
-            this._fillSegmentByColor(startIndexC, endIndexC, COLOR_TUNNEL_FOCUS)
+            const { startIndex, endIndex } = this.sections[Id]
+            this._fillSegmentByColor(startIndex, endIndex, COLOR_TUNNEL_FOCUS)
         }
         this._currentSectionIdFocus = Id
     }
 
     drawRedColorNodes (nodesIds: number[]) {
-        if (!this.tunnelsMesh) return;
+        if (!this.tunnelsMesh || !this.tunnelsMesh.geometry.index) return;
 
         const colorNotHorizon = nodesIds.length > 0 ? COLOR_TUNNEL_NOT_HORIZON : COLOR_TUNNEL
         for (let key in this.sections) {
             this.sections[key].currentColor = colorNotHorizon
         } 
-        this._fillSegmentByColor(0, this.tunnelsMesh.geometry.attributes.color.count * 3, colorNotHorizon)
+        this._fillSegmentByColor(0, this.tunnelsMesh.geometry.index.array.length - 1, colorNotHorizon)
    
         for (let i = 0; i < nodesIds.length; ++i) {
             const nodeId = nodesIds[i]
@@ -258,17 +271,21 @@ export class MeshBuilder {
                 continue
             }
             this.sections[nodeId].currentColor = COLOR_HORIZON_FOCUS
-            const { startIndexC, endIndexC } = this.sections[nodeId]
-            this._fillSegmentByColor(startIndexC, endIndexC, this.sections[nodeId].currentColor)
+            const { startIndex, endIndex } = this.sections[nodeId]
+            this._fillSegmentByColor(startIndex, endIndex, this.sections[nodeId].currentColor)
         }
     }
 
-    _fillSegmentByColor (startIndexC: number, endIndexC: number, colorFill: [number, number, number]) {
+    private _fillSegmentByColor (startIndex: number, endIndex: number, colorFill: [number, number, number]) {
         if (!this.tunnelsMesh) {
-            return
+            return;
+        }
+        const { index } = this.tunnelsMesh.geometry
+        if (!index) {
+            return;
         }
         const { color } = this.tunnelsMesh.geometry.attributes
-        for (let j = startIndexC; j < endIndexC; j += 3) {
+        for (let j = index.array[startIndex] * 3; j < index.array[endIndex] * 3; j += 3) {
             color.array[j] = colorFill[0]
             color.array[j + 1] = colorFill[1]
             color.array[j + 2] = colorFill[2]

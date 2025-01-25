@@ -7,10 +7,10 @@ export class Section {
     static typeItem: string = 'Section'
 
     Id: number
-    startIndexV: number 
-    endIndexV: number
-    startIndexC: number 
-    endIndexC: number
+    startIndex: number 
+    endIndex: number
+    //startIndexC: number 
+    //endIndexC: number
     startPos: [number, number, number]
     endPos: [number, number, number]
     len: number
@@ -22,10 +22,8 @@ export class Section {
 
     constructor ({
         Id,
-        startIndexV,
-        endIndexV,
-        startIndexC,
-        endIndexC,
+        startIndex,
+        endIndex,
         startPos,
         endPos,
         len,
@@ -34,10 +32,8 @@ export class Section {
         endNodeId,
     }: {
         Id: number
-        startIndexV: number
-        endIndexV: number
-        startIndexC: number
-        endIndexC: number
+        startIndex: number
+        endIndex: number
         startPos: [number, number, number]
         endPos: [number, number, number]
         len: number
@@ -46,10 +42,8 @@ export class Section {
         endNodeId: number
     }) {
         this.Id = Id
-        this.startIndexV = startIndexV
-        this.endIndexV = endIndexV
-        this.startIndexC = startIndexC
-        this.endIndexC = endIndexC
+        this.startIndex = startIndex
+        this.endIndex = endIndex
         this.startPos = startPos
         this.endPos = endPos
         this.len = len

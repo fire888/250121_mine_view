@@ -25,11 +25,11 @@ export class Studio {
 
         this.scene = new THREE.Scene()
 
-        this._hemiLight = new THREE.HemisphereLight(0x48534a, 0xffffff, 6)
+        this._hemiLight = new THREE.HemisphereLight(0x48534a, 0xffffff, 4)
         this._hemiLight.position.set( 0, 20, 0 )
         this.scene.add(this._hemiLight)
 
-        this._dirLight = new THREE.DirectionalLight(0xffffff, 10)
+        this._dirLight = new THREE.DirectionalLight(0xffffff, 7)
         this._dirLight.position.set(-3, 10, 2)
         this.scene.add(this._dirLight)
 
