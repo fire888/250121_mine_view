@@ -52,7 +52,7 @@ const ComponentThree: React.FC<PropsFromRedux> = ({
         })
     }, [showApplication, setValuePopupInfo, setHorizonsNames, setValuePopupCoords])
 
-    // Следим за изменением текущего Горизонта
+    // Если текуший Горизонт изменен - подсвнечиваем его в 3д
     useEffect(() => {
         if (!viewerRef.current) { 
             return;
