@@ -63,7 +63,7 @@ export class ThreeViewer {
     }
 
     setCurrentHorizonName(horizonName: string) {
-        if (!this.graph || !this._meshBuilder) return
+        if (!this.graph || !this._meshBuilder) return;
 
         const sections = this.graph.getSectionsByHorizonName(horizonName)
         this._meshBuilder.highlightSections(sections)
