@@ -177,18 +177,6 @@ export class Graph {
         console.log("Graph parsed:", this);
     }
 
-    getMessageById(Id: number): string {
-        const section = this.Sections[Id];
-        if (!section) {
-            return ``
-        }
-        return (
-            `Section: ${section.Id}, ` +
-            `StartNodeId: ${section.StartNodeId}, ` +
-            `EndNodeId: ${section.EndNodeId}`
-        )
-    }
-
     getHorizonsNames(): string[] {
         return Object.values(this.Horizons).map((horizon) => horizon.Name);
     }
@@ -201,5 +189,22 @@ export class Graph {
             return [];
         }
         return horizon.Sections;
+    }
+
+    getSectionData (sectionId: number | null) {
+        if (!sectionId) {
+            return null;
+        }
+        const section = this.Sections[sectionId]
+        if (!section) {
+            return null
+        }
+        return (
+            `Section: ${section.Id}, ` +
+            `StartNodeId: ${section.StartNodeId}, ` +
+            `EndNodeId: ${section.EndNodeId}, ` + 
+            `Thickness: ${section.Thickness}, ` + 
+            `Guid: ${section.Guid}`
+        )
     }
 }

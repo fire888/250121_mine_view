@@ -6,5 +6,6 @@ export const TUNNEL_MATERIAL_PROPS = {
 }
 export const COLOR_TUNNEL: [number, number, number] = [.7, .7, .7]
 export const COLOR_TUNNEL_FOCUS: [number, number, number] = [1, 0, 1]
+export const COLOR_TUNNEL_PICKED: [number, number, number] = [0, 0, 1]
 export const COLOR_HORIZON_FOCUS: [number, number, number] = [1, 1, .8]
 export const COLOR_TUNNEL_NOT_HORIZON: [number, number, number] = [.05, .05, .05]

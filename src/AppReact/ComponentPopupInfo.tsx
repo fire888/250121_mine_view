@@ -5,14 +5,14 @@ import { RootState } from './store'
 
 const mapStateToProps = (state: RootState) => {
     return {
-        valuePopupInfo: state.threeUI.valuePopupInfo,
+        сurrentSectorId: state.threeUI.сurrentSectorId,
     }
 }
 
 const connector = connect(mapStateToProps)
 type PropsFromRedux = ConnectedProps<typeof connector>
 
-const ComponentPopupInfo: React.FC<PropsFromRedux> = ({ valuePopupInfo }) => {
+const ComponentPopupInfo: React.FC<PropsFromRedux> = ({ сurrentSectorId }) => {
     const [position, setPosition] = useState({ x: 0, y: 0 })
 
     useEffect(() => {
@@ -29,18 +29,18 @@ const ComponentPopupInfo: React.FC<PropsFromRedux> = ({ valuePopupInfo }) => {
         }
     }, [])
 
-    document.body.style.cursor = valuePopupInfo ? 'pointer' : '';
+    document.body.style.cursor = сurrentSectorId ? 'pointer' : '';
 
     return (
         <div>
-            {valuePopupInfo && (
+            {сurrentSectorId && (
                 <div
                     className="popup-info"
                     style={{
                         left: position.x + 'px',
                         top: position.y - 60 + 'px',
                     }}
-                >{'Section Id: ' + valuePopupInfo}</div>
+                >{'Section Id: ' + сurrentSectorId}</div>
             )}
         </div>
     )

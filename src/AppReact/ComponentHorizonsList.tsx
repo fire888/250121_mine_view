@@ -27,7 +27,8 @@ const ComponentHorizonsList: React.FC<PropsFromRedux> = props => {
                 <div 
                     className='horizon-item' 
                     key={horizonName}
-                    onClick={() => {
+                    onClick={e => {
+                        e.stopPropagation()
                         props.setCurrentButtonName(horizonName)
                     }}
                 >{`[${ props.currentButtonName === horizonName ? 'V' : ' '}] ${ horizonName }`}</div>))}

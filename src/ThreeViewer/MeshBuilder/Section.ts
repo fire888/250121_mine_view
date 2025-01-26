@@ -17,6 +17,7 @@ export class Section {
     startNodeId: number
     endNodeId: number
     currentColor = CONSTANTS.COLOR_TUNNEL
+    isPicked: boolean = false
 
     constructor ({
         Id,

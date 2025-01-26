@@ -8,6 +8,7 @@ import {
     COLOR_TUNNEL, 
     COLOR_HORIZON_FOCUS,
     COLOR_TUNNEL_NOT_HORIZON,
+    COLOR_TUNNEL_PICKED,
 } from '../CONSTANTS.ts'
 import { Section } from './Section.ts'
 
@@ -33,6 +34,7 @@ export class MeshBuilder {
     graph: Graph | null = null
     sections: SectionsData = {}
     private _currentSectionIdFocus: number | null = null
+    private _currentSectionIdPicked: number | null = null
     
     init () {}
 
@@ -133,104 +135,6 @@ export class MeshBuilder {
         this.zCenter = this.zMin + (this.zMax - this.zMin) * .5
     }
 
-    drawLines () {
-        if (!this.graph) {
-            return;
-        }
-
-        const graph = this.graph
-        for (let key in graph.Sections) {
-            const { StartNodeId, EndNodeId } = graph.Sections[key]
-
-            if (!graph.Nodes[StartNodeId] || !graph.Nodes[EndNodeId]) {
-                continue;
-            }
-
-            const v = [
-                ...graph.Nodes[StartNodeId].pos,
-                ...graph.Nodes[EndNodeId].pos
-            ]
-            this._createLine(v, [Math.random(), Math.random(), Math.random()])
-        }
-    }
-
-    private _createLine (v: number[], color: [number, number, number]) {
-        const geometry = new THREE.BufferGeometry()
-        const vF32 = new Float32Array(v)
-        geometry.setAttribute('position', new THREE.BufferAttribute(vF32, 3))
-        const mat = new THREE.LineBasicMaterial({ color: new THREE.Color().setRGB(color[0], color[1], color[2]) })
-        const line = new THREE.Line(geometry, mat)
-        this.mesh.add(line)
-    }
-
-    drawLabels () {
-        if (!this.graph) {
-            return;
-        }
-
-        const graph = this.graph
-        const nodeGeom = new THREE.BoxGeometry(2, 2, 2)
-        const nodeMat = new THREE.MeshBasicMaterial({ color: 0xfffff })
-        for (let key in graph.Nodes) {
-            const { pos } = graph.Nodes[key]
-            const m = new THREE.Mesh(
-                nodeGeom, 
-                nodeMat,
-            )
-            m.position.set(...pos)
-            this.mesh.add(m)
-            this._createLabel({ 
-                text: key, 
-                color: [1, 1, 1], 
-                colorBack: null, 
-                pos, 
-            })
-        }
-    }  
-
-    private _createLabel ({ 
-        text, 
-        color, 
-        colorBack = null, 
-        pos
-    }: {
-        text: string,
-        color: [number, number, number,]
-        colorBack: [number, number, number,] | null,
-        pos: [number, number, number]
-    }) {
-        const canvas = document.createElement( 'canvas' );
-        const ctx = canvas.getContext( '2d' );
-
-        if (!ctx) {
-            return;
-        }
-
-        canvas.width = 128 * (text.length * .5);
-        canvas.height = 128;
-
-        if (colorBack) {
-            const hex = MATH_HELPS.rgb2hex(...color)
-            ctx.fillStyle = hex
-            ctx.fillRect( 0, 0, 128 * (text.length * .5), 128 );
-        }
-
-        const hex = MATH_HELPS.rgb2hex(...color)
-        ctx.fillStyle = hex
-        ctx.font = 'bold 60pt arial'
-        ctx.textAlign = "left"
-        ctx.fillText(text, 0, 100)
-
-        const map = new THREE.CanvasTexture( canvas )
-        const material = new THREE.SpriteMaterial({ map: map })
-
-        const sprite = new THREE.Sprite(material)
-        sprite.position.set(...pos)
-        sprite.scale.set(5, 5, 5)
-
-        this.mesh.add(sprite)
-    }
-
     getMeshesForClick (): THREE.Mesh[] {
         const arr: THREE.Mesh[] = []
         for (let key in this.sections) {
@@ -241,15 +145,32 @@ export class MeshBuilder {
 
     focusOn (Id: number | null) {
         if (this._currentSectionIdFocus !== null && this._currentSectionIdFocus !== Id) {
-            const { startIndex, endIndex, currentColor } = this.sections[this._currentSectionIdFocus]
-            this._fillSegmentByColor(startIndex, endIndex, currentColor)
+            const { startIndex, endIndex, currentColor, isPicked } = this.sections[this._currentSectionIdFocus]
+            !isPicked && this._fillSegmentByColor(startIndex, endIndex, currentColor)
         }
         if (Id !== null && this._currentSectionIdFocus !== Id) {
             this._currentSectionIdFocus = Id
-            const { startIndex, endIndex } = this.sections[Id]
-            this._fillSegmentByColor(startIndex, endIndex, COLOR_TUNNEL_FOCUS)
+            const { startIndex, endIndex, isPicked } = this.sections[Id]
+            !isPicked &&  this._fillSegmentByColor(startIndex, endIndex, COLOR_TUNNEL_FOCUS)
         }
         this._currentSectionIdFocus = Id
+    }
+
+    setCurrentSectorPicked (Id: number | null) {
+        if (this._currentSectionIdPicked !== null) {
+            this.sections[this._currentSectionIdPicked].isPicked = false
+            this._fillSegmentByColor(
+                this.sections[this._currentSectionIdPicked].startIndex, 
+                this.sections[this._currentSectionIdPicked].endIndex, 
+                this.sections[this._currentSectionIdPicked].currentColor
+            )  
+        }
+        this._currentSectionIdPicked = Id
+        if (!Id) {
+            return;
+        }
+        this.sections[Id].isPicked = true
+        this._fillSegmentByColor(this.sections[Id].startIndex, this.sections[Id].endIndex, COLOR_TUNNEL_PICKED)
     }
 
     highlightSections (sectionsIds: number[]) {
@@ -267,8 +188,8 @@ export class MeshBuilder {
                 continue;
             }
             this.sections[sectionId].currentColor = COLOR_HORIZON_FOCUS
-            const { startIndex, endIndex } = this.sections[sectionId]
-            this._fillSegmentByColor(startIndex, endIndex, this.sections[sectionId].currentColor)
+            const { startIndex, endIndex, isPicked } = this.sections[sectionId]
+            !isPicked && this._fillSegmentByColor(startIndex, endIndex, this.sections[sectionId].currentColor)
         }
     }
 

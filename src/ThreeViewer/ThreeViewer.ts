@@ -5,8 +5,8 @@ import { ControlsOrbit } from './Orbit'
 import { MeshBuilder } from './MeshBuilder/MeshBuilder'
 
 export class ThreeViewer {
+    graph: Graph | null = null
     private _studio: Studio | null = null
-    private _graph: Graph | null = null
     private _meshBuilder: MeshBuilder | null = null
     private _cbOnMouseOverElement: (val: number | null) => void = () => {}
 
@@ -20,11 +20,11 @@ export class ThreeViewer {
         this._meshBuilder.init()
         this._studio.add(this._meshBuilder.mesh)
 
-        if (!this._graph) {
-            return
+        if (!this.graph) {
+            return;
         }
 
-        this._meshBuilder.setGraph(this._graph)
+        this._meshBuilder.setGraph(this.graph)
         this._meshBuilder.drawTunnels()
 
         // Коллбэк при наведении мыши
@@ -54,13 +54,18 @@ export class ThreeViewer {
     }
 
     setGraph(graph: Graph) {
-        this._graph = graph
+        this.graph = graph
+    }
+
+    setCurrentSectorPicked (Id: number | null) {
+        if (!this._meshBuilder) return;
+        this._meshBuilder.setCurrentSectorPicked(Id)
     }
 
     setCurrentHorizonName(horizonName: string) {
-        if (!this._graph || !this._meshBuilder) return
+        if (!this.graph || !this._meshBuilder) return
 
-        const sections = this._graph.getSectionsByHorizonName(horizonName)
+        const sections = this.graph.getSectionsByHorizonName(horizonName)
         this._meshBuilder.highlightSections(sections)
     }
 
