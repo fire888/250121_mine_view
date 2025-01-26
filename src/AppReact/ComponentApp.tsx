@@ -23,7 +23,8 @@ const mapStateToProps = (state: RootState) => {
 }
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
-    showApplication: () => dispatch({ type: TYPES_ACTIONS.SHOW_APPLICATION }),
+    showApplication: () => 
+        dispatch({ type: TYPES_ACTIONS.SHOW_APPLICATION }),
     setCurrentSectorId: (text: number | null) =>
         dispatch({ type: TYPES_ACTIONS.SET_CURRENT_SECTOR_ID, text }),
     setHorizonsNames: (horizonsNames: string[]) =>
