@@ -1,4 +1,4 @@
-import { MULTIPLE_ALL_COORDS } from "./CONSTANTS.ts";
+import { MULTIPLE_ALL_COORDS } from "../ThreeViewer/CONSTANTS.ts";
 
 type A3 = [number, number, number]
 
@@ -193,7 +193,7 @@ export class Graph {
         return Object.values(this.Horizons).map((horizon) => horizon.Name);
     }
 
-    getNodesByHorizonName(name: string): number[] {
+    getSectionsByHorizonName(name: string): number[] {
         const horizon = Object.values(this.Horizons).find(
             (h) => h.Name === name
         );

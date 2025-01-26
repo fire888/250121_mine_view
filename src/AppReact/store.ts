@@ -11,7 +11,7 @@ interface AppState {
 
 export const TYPES_ACTIONS = {
     SHOW_APPLICATION: 'SHOW_APPLICATION',
-    SET_VALUE_POPUP_INFO: 'SET_VALUE_POPUP_INFO',
+    SET_CURRENT_SECTOR_ID: 'SET_CURRENT_SECTOR_ID',
     SET_VALUE_POPUP_COORDS: 'SET_VALUE_POPUP_COORDS',
     SET_BUTTONS_HORIZONS: 'SET_BUTTONS_MINES',
     SET_CURRENT_BUTTON_HORIZON: 'SET_CURRENT_BUTTON_HORIZON',
@@ -27,7 +27,7 @@ const appStartState: AppState = {
     valuePopupInfo: '',
     valuePopupX: 0,
     valuePopupY: 0,
-    buttonsHorizons: ['X'],
+    buttonsHorizons: [],
     currentButtonHorizon: 'X',
 }
 
@@ -39,7 +39,7 @@ const reducerThreeUI = (state: AppState = appStartState, action: AppAction) => {
         })
     }
 
-    if (action.type === TYPES_ACTIONS.SET_VALUE_POPUP_INFO) {
+    if (action.type === TYPES_ACTIONS.SET_CURRENT_SECTOR_ID) {
         return ({
             ...state,
             valuePopupInfo: action.text,

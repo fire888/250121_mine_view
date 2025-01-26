@@ -1,0 +1,84 @@
+import './ComponentApp.css'
+import ComponentLoader from './ComponentLoader.tsx'
+import ComponentPopupInfo from './ComponentPopupInfo.tsx'
+import ComponentHorizonsList from './ComponentHorizonsList.tsx'
+import { connect, ConnectedProps } from 'react-redux'
+import { Dispatch } from 'redux'
+import { useRef, useEffect } from 'react'
+import { TYPES_ACTIONS, RootState } from './store.ts'
+
+// @ts-ignore
+import xmlFileSrc from '../assets/MIM_Scheme.xml' // Импорт XML-файла с данными
+import { loadXMLFile } from '../helpers/loadXML.ts'
+import { Graph } from './Graph.ts'
+import { ThreeViewer } from '../ThreeViewer/ThreeViewer.ts'
+
+const mapStateToProps = (state: RootState) => {
+    return {
+        isShowComponentLoader: state.threeUI.isShowComponentLoader,
+        currentHorizon: state.threeUI.currentButtonHorizon,
+    }
+}
+
+const mapDispatchToProps = (dispatch: Dispatch) => ({
+    showApplication: () => dispatch({ type: TYPES_ACTIONS.SHOW_APPLICATION }),
+    setCurrentSectorId: (text: number | null) =>
+        dispatch({ type: TYPES_ACTIONS.SET_CURRENT_SECTOR_ID, text }),
+    setHorizonsNames: (horizonsNames: string[]) =>
+        dispatch({ type: TYPES_ACTIONS.SET_BUTTONS_HORIZONS, value: horizonsNames }),
+})
+
+const connector = connect(mapStateToProps, mapDispatchToProps)
+type PropsFromRedux = ConnectedProps<typeof connector>
+
+const App: React.FC<PropsFromRedux> = (props) => {
+    const threeViewerWrapperRef = useRef<HTMLDivElement | null>(null)
+    const viewerRef = useRef<ThreeViewer | null>(null)
+
+    // Эффект для инициализации 3D-вьювера и загрузки данных
+    useEffect(() => {
+        if (viewerRef.current) { 
+            return;
+        }
+        const viewer = new ThreeViewer()
+        viewerRef.current = viewer
+        
+        const initAllApplication = async () => {
+            // Загружаем и инициализируем граф из XML-файла
+            const fileData = await loadXMLFile(xmlFileSrc)
+            const graph = new Graph()
+            graph.parse(fileData)
+
+            // Настраиваем 3D-сцену и вешаем коллбэки на взаимодействие с ней
+            viewer.setGraph(graph)
+            await viewer.build()
+            viewer.onMouseOver(props.setCurrentSectorId)
+            viewer.appendParentDomContainer(threeViewerWrapperRef.current)
+
+            // Подготавливаем интерфейс: скрываем лоадер и показываем приложение
+            props.setHorizonsNames(graph.getHorizonsNames())
+            props.showApplication()
+        }
+        initAllApplication().then()
+
+    }, [props.setCurrentSectorId ])
+
+    // Эффект для обновления текущего Горизонта в 3D-вьювере
+    useEffect(() => {
+        if (!viewerRef.current) { 
+            return;
+        }
+        viewerRef.current.setCurrentHorizonName(props.currentHorizon)
+    }, [props.currentHorizon])
+
+    return (
+        <div className="App">
+            <div className='three-viewer-wrapper' ref={threeViewerWrapperRef}></div>
+            {props.isShowComponentLoader && <ComponentLoader />}
+            <ComponentPopupInfo />
+            <ComponentHorizonsList />
+        </div>
+    )
+}
+
+export default connector(App)

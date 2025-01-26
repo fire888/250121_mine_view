@@ -4,7 +4,6 @@ import { Dispatch } from 'redux'
 import { TYPES_ACTIONS } from './store'
 import { RootState } from './store'
 
-
 const mapStateToProps = (state: RootState) => {
     return {
         buttonsNames: state.threeUI.buttonsHorizons,

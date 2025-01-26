@@ -1,6 +1,6 @@
 import * as THREE from 'three'
-import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUtils.js'
-import { Graph } from '../Graph.ts'
+// import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUtils.js'
+import { Graph } from '../../AppReact/Graph.ts'
 import * as MATH_HELPS from '../mathHelp.ts'
 import { 
     TUNNEL_MATERIAL_PROPS, 
@@ -252,23 +252,23 @@ export class MeshBuilder {
         this._currentSectionIdFocus = Id
     }
 
-    drawRedColorNodes (nodesIds: number[]) {
+    highlightSections (sectionsIds: number[]) {
         if (!this.tunnelsMesh || !this.tunnelsMesh.geometry.index) return;
 
-        const colorNotHorizon = nodesIds.length > 0 ? COLOR_TUNNEL_NOT_HORIZON : COLOR_TUNNEL
+        const colorNotHorizon = sectionsIds.length > 0 ? COLOR_TUNNEL_NOT_HORIZON : COLOR_TUNNEL
         for (let key in this.sections) {
             this.sections[key].currentColor = colorNotHorizon
         } 
         this._fillSegmentByColor(0, this.tunnelsMesh.geometry.index.array.length - 1, colorNotHorizon)
    
-        for (let i = 0; i < nodesIds.length; ++i) {
-            const nodeId = nodesIds[i]
-            if (!this.sections[nodeId]) {
-                continue
+        for (let i = 0; i < sectionsIds.length; ++i) {
+            const sectionId = sectionsIds[i]
+            if (!this.sections[sectionId]) {
+                continue;
             }
-            this.sections[nodeId].currentColor = COLOR_HORIZON_FOCUS
-            const { startIndex, endIndex } = this.sections[nodeId]
-            this._fillSegmentByColor(startIndex, endIndex, this.sections[nodeId].currentColor)
+            this.sections[sectionId].currentColor = COLOR_HORIZON_FOCUS
+            const { startIndex, endIndex } = this.sections[sectionId]
+            this._fillSegmentByColor(startIndex, endIndex, this.sections[sectionId].currentColor)
         }
     }
 
