@@ -179,8 +179,10 @@ export class MeshBuilder {
         const colorNotHorizon = sectionsIds.length > 0 ? COLOR_TUNNEL_NOT_HORIZON : COLOR_TUNNEL
         for (let key in this.sections) {
             this.sections[key].currentColor = colorNotHorizon
+            const { startIndex, endIndex, isPicked } = this.sections[key]
+            !isPicked && this._fillSegmentByColor(startIndex, endIndex, colorNotHorizon)
         } 
-        this._fillSegmentByColor(0, this.tunnelsMesh.geometry.index.array.length - 1, colorNotHorizon)
+
    
         for (let i = 0; i < sectionsIds.length; ++i) {
             const sectionId = sectionsIds[i]

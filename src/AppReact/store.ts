@@ -48,15 +48,7 @@ const reducerThreeUI = (state: AppState = appStartState, action: AppAction) => {
     if (action.type === TYPES_ACTIONS.SHOW_BOTTOM_SECTOR_INFO) {
         return ({
             ...state,
-            bottomInfo: action.text
-        })
-    }
-
-    if (action.type === TYPES_ACTIONS.SET_VALUE_POPUP_COORDS) {
-        return ({
-            ...state,
-            valuePopupX: action.x,
-            valuePopupY: action.y,
+            bottomInfo: action.text,
         })
     }
 
@@ -70,7 +62,8 @@ const reducerThreeUI = (state: AppState = appStartState, action: AppAction) => {
     if (action.type === TYPES_ACTIONS.SET_CURRENT_BUTTON_HORIZON) {
         return ({
             ...state,
-            currentButtonHorizon: action.value
+            currentButtonHorizon: action.value,
+            bottomInfo: null,
         })
     }
 

@@ -19,6 +19,7 @@ const mapStateToProps = (state: RootState) => {
         isShowComponentLoader: state.threeUI.isShowComponentLoader,
         currentHorizon: state.threeUI.currentButtonHorizon,
         сurrentSectorId: state.threeUI.сurrentSectorId,
+        bottomInfo: state.threeUI.bottomInfo
     }
 }
 
@@ -67,7 +68,7 @@ const App: React.FC<PropsFromRedux> = (props) => {
         }
         initAllApplication().then()
 
-    }, [props.setCurrentSectorId ])
+    }, [props.setCurrentSectorId])
 
     // Эффект для подсветки текущих Секторов Горизонта в 3D-вьювере
     useEffect(() => {
@@ -79,6 +80,8 @@ const App: React.FC<PropsFromRedux> = (props) => {
 
     // Эффект для показа информации при клике на сектор и окрас его в синий
     useEffect(() => {
+        if (!threeViewerWrapperRef.current) return;
+
         let time = Date.now()
         const handleDown = () => {
             time = Date.now()
@@ -86,27 +89,29 @@ const App: React.FC<PropsFromRedux> = (props) => {
 
         const handleUp = () => {
             if (!viewerRef.current || !viewerRef.current.graph) return;
+
             if (Date.now() - time > 200) return;
 
-            // при клике на пустое пространство сбрасываем текущий сектор
-            if (!props.сurrentSectorId) {
-                props.showBottomSectorInfo(null)
-                viewerRef.current.setCurrentSectorPicked(null)
-                return;
-            }
-
-            // при клике на сектор закрепляем его и показываем инфо
-            const messBottom = viewerRef.current.graph.getSectionData(props.сurrentSectorId)
-            props.showBottomSectorInfo(messBottom)
-            viewerRef.current.setCurrentSectorPicked(props.сurrentSectorId)
+            const bottomInfo = viewerRef.current.graph.getSectionData(props.сurrentSectorId)
+            props.showBottomSectorInfo(bottomInfo)
         }
-        window.addEventListener('pointerdown', handleDown)
-        window.addEventListener('pointerup', handleUp)
+        threeViewerWrapperRef.current.addEventListener('pointerdown', handleDown)
+        threeViewerWrapperRef.current.addEventListener('pointerup', handleUp)
         return () => {
-            window.removeEventListener('pointerdown', handleDown)
-            window.removeEventListener('pointerup', handleUp)
+            if (!threeViewerWrapperRef.current) return;
+
+            threeViewerWrapperRef.current.removeEventListener('pointerdown', handleDown)
+            threeViewerWrapperRef.current.removeEventListener('pointerup', handleUp)
         }
     }, [props.сurrentSectorId])
+
+    // Эффект для очистки окраса в синий
+    useEffect(() => {
+        if (!viewerRef.current) { 
+            return;
+        }
+        viewerRef.current.setCurrentSectorPicked(props.bottomInfo ? props.сurrentSectorId : null)
+    }, [props.bottomInfo])
 
     return (
         <div className="App">

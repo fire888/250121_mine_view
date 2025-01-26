@@ -21,17 +21,10 @@ const ComponentBottomInfo: React.FC<PropsFromRedux> = (props) => {
     return (
         <div>
             {props.bottomInfo && (
-                <div 
-                    className="bottom-info"
-                    onClick={(e) => {
-                        e.preventDefault()
-                        e.stopPropagation()
-                    }}
-                >
+                <div className="bottom-info">
                     <div 
                         className='close-bottom-info'
-                        onClick={(e) => {
-                            e.stopPropagation()
+                        onClick={() => {
                             props.showBottomSectorInfo(null)
                         }}
                     >close</div>
