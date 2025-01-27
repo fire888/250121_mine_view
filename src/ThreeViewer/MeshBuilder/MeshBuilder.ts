@@ -182,7 +182,6 @@ export class MeshBuilder {
             const { startIndex, endIndex, isPicked } = this.sections[key]
             !isPicked && this._fillSegmentByColor(startIndex, endIndex, colorNotHorizon)
         } 
-
    
         for (let i = 0; i < sectionsIds.length; ++i) {
             const sectionId = sectionsIds[i]
