@@ -12,8 +12,8 @@ export class Studio {
 
     private _meshesForClick: THREE.Mesh[] = []
     private _raycaster: THREE.Raycaster = new THREE.Raycaster()
-    private _cbsOnMouseOver: ((val: number | null) => void)[] = []
-    private _currentMeshIdMouseOver: number | null = null
+    private _cbsOnMouseOver: ((val: { Id: number, typeItem: string } | null) => void)[] = []
+    private _currentMeshIdMouseOver: { Id: number, typeItem: string } | null = null
 
     constructor () {
         this.containerDom = document.createElement('div')
@@ -41,7 +41,7 @@ export class Studio {
         window.addEventListener('resize', this._onWindowResize.bind(this))
         this._onWindowResize()
 
-        window.addEventListener('pointermove', this._onPointerMove.bind(this))
+        window.addEventListener('pointermove', this._checkMousePointer.bind(this))
         window.addEventListener('pointerdown', this._onPointeDown.bind(this))
 
         this.render()
@@ -53,16 +53,7 @@ export class Studio {
     }
 
     render () {
-        this._raycaster.setFromCamera(this.pointer, this.camera)
-        const intersects = this._raycaster.intersectObjects(this._meshesForClick, true)
-        const result = intersects[0] 
-            ? intersects[0].object.userData.Id
-            : null
-
-        if (result !== this._currentMeshIdMouseOver) {
-            this._currentMeshIdMouseOver = result
-            this._cbsOnMouseOver.forEach(cb => cb(result))
-        }
+        this._checkRaycaster()
 
         this._renderer.render(this.scene, this.camera)
     }
@@ -73,26 +64,38 @@ export class Studio {
         this._renderer.setSize(window.innerWidth, window.innerHeight)
     }
 
-    private _onPointerMove (e: PointerEvent) {
-        this.pointer.x = ( e.clientX / window.innerWidth ) * 2 - 1
-        this.pointer.y = - ( e.clientY / window.innerHeight ) * 2 + 1
+    private _onPointeDown (e: PointerEvent) {
+        this._checkMousePointer(e)
+        this._checkRaycaster()
     }
 
-    private _onPointeDown (e: PointerEvent) {
+    private _checkMousePointer (e: PointerEvent) {
         this.pointer.x = ( e.clientX / window.innerWidth ) * 2 - 1
         this.pointer.y = - ( e.clientY / window.innerHeight ) * 2 + 1
+    } 
 
+    private _checkRaycaster () {
         this._raycaster.setFromCamera(this.pointer, this.camera)
         const intersects = this._raycaster.intersectObjects(this._meshesForClick, true)
         const result = intersects[0] 
-            ? intersects[0].object.userData.Id
+            ? { Id: intersects[0].object.userData.Id, typeItem: intersects[0].object.userData.typeItem }
             : null
 
-        if (result !== this._currentMeshIdMouseOver) {
+        if (!result && this._currentMeshIdMouseOver !== null) {
             this._currentMeshIdMouseOver = result
             this._cbsOnMouseOver.forEach(cb => cb(result))
         }
-    } 
+
+        if (result && this._currentMeshIdMouseOver && result.Id !== this._currentMeshIdMouseOver.Id) {
+            this._currentMeshIdMouseOver = result
+            this._cbsOnMouseOver.forEach(cb => cb(result))
+        }
+
+        if (result && !this._currentMeshIdMouseOver) {
+            this._currentMeshIdMouseOver = result
+            this._cbsOnMouseOver.forEach(cb => cb(result))
+        }
+    }
 
     add (m: THREE.Object3D) {
         this.scene.add(m)
@@ -119,7 +122,7 @@ export class Studio {
         } 
     }
 
-    setCbOnMouseOver (cb: (val: number | null) => void): void {
+    setCbOnMouseOver (cb: (val: { Id: number, typeItem: string } | null) => void): void {
         this._cbsOnMouseOver.push(cb)
     }
 }

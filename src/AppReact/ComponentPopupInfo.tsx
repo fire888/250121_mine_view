@@ -5,14 +5,15 @@ import { RootState } from './store'
 
 const mapStateToProps = (state: RootState) => {
     return {
-        сurrentSectorId: state.threeUI.сurrentSectorId,
+        сurrentItemId: state.threeUI.сurrentItemId,
+        сurrentItemType: state.threeUI.сurrentItemType,
     }
 }
 
 const connector = connect(mapStateToProps)
 type PropsFromRedux = ConnectedProps<typeof connector>
 
-const ComponentPopupInfo: React.FC<PropsFromRedux> = ({ сurrentSectorId }) => {
+const ComponentPopupInfo: React.FC<PropsFromRedux> = ({ сurrentItemId, сurrentItemType }) => {
     const [position, setPosition] = useState({ x: 0, y: 0 })
 
     useEffect(() => {
@@ -29,18 +30,18 @@ const ComponentPopupInfo: React.FC<PropsFromRedux> = ({ сurrentSectorId }) => {
         }
     }, [])
 
-    document.body.style.cursor = сurrentSectorId ? 'pointer' : '';
+    document.body.style.cursor = сurrentItemId ? 'pointer' : '';
 
     return (
         <div>
-            {сurrentSectorId && (
+            {сurrentItemId && (
                 <div
                     className="popup-info"
                     style={{
                         left: position.x + 'px',
                         top: position.y - 60 + 'px',
                     }}
-                >{'Section Id: ' + сurrentSectorId}</div>
+                >{`${сurrentItemType}: ${сurrentItemId}`}</div>
             )}
         </div>
     )

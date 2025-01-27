@@ -9,16 +9,23 @@ import {
     COLOR_HORIZON_FOCUS,
     COLOR_TUNNEL_NOT_HORIZON,
     COLOR_TUNNEL_PICKED,
+    TUNNEL_RADIUS,
 } from '../CONSTANTS.ts'
 import { Section } from './Section.ts'
+import { Node } from './Node.ts'
 
 type SectionsData = {
     [key: string]: Section
+}
+type NodesData = {
+    [key: string]: Node
 }
 
 export class MeshBuilder {
     mesh: THREE.Object3D = new THREE.Object3D() 
     tunnelsMesh: THREE.Mesh | null = null
+    nodeLabel: THREE.Mesh | null = null 
+    nodeLabelPicked: THREE.Mesh | null = null 
     xMin: number = Infinity 
     xMax: number = -Infinity
     yMin: number = Infinity
@@ -33,6 +40,7 @@ export class MeshBuilder {
     zW: number = 0
     graph: Graph | null = null
     sections: SectionsData = {}
+    nodes: NodesData = {}
     private _currentSectionIdFocus: number | null = null
     private _currentSectionIdPicked: number | null = null
     
@@ -109,6 +117,22 @@ export class MeshBuilder {
 
         this.tunnelsMesh = new THREE.Mesh(geometry, material)
         this.mesh.add(this.tunnelsMesh)
+
+        this._buildNodes()
+    }
+
+    private _buildNodes () {
+        if (!this.graph) {
+            return;
+        }
+        for (let key in this.graph.Nodes) {
+            const node = new Node({ 
+                Id: this.graph.Nodes[key].Id,
+                pos: this.graph.Nodes[key].pos
+            })
+            this.mesh.add(node.meshForClick)
+            this.nodes[key] = node        
+        }
     }
 
     private _calculateBounds () {
@@ -140,37 +164,91 @@ export class MeshBuilder {
         for (let key in this.sections) {
             this.sections[key].meshForClick && arr.push(this.sections[key].meshForClick)
         }
+        for (let key in this.nodes) {
+            this.nodes[key].meshForClick && arr.push(this.nodes[key].meshForClick)
+        }
         return arr
     }
 
-    focusOn (Id: number | null) {
-        if (this._currentSectionIdFocus !== null && this._currentSectionIdFocus !== Id) {
+    focusOn (result: { Id: number, typeItem: string } | null) {
+        if (!this.nodeLabel) {
+            this.nodeLabel = new THREE.Mesh(
+                new THREE.SphereGeometry(TUNNEL_RADIUS * 1.5, 32, 32),
+                new THREE.MeshPhongMaterial({
+                    ...TUNNEL_MATERIAL_PROPS,
+                    color: 0xFF00FF,
+                }),
+            )
+            this.mesh.add(this.nodeLabel)
+        }
+        this.nodeLabel.visible = false
+
+        if (result?.typeItem === Node.typeItem) {
+            const node = this.nodes[result.Id]
+            const { pos } = node
+            this.nodeLabel.position.set(...pos)
+            this.nodeLabel.visible = true
+        }
+
+        if (this._currentSectionIdFocus !== null) {
             const { startIndex, endIndex, currentColor, isPicked } = this.sections[this._currentSectionIdFocus]
             !isPicked && this._fillSegmentByColor(startIndex, endIndex, currentColor)
         }
-        if (Id !== null && this._currentSectionIdFocus !== Id) {
-            this._currentSectionIdFocus = Id
-            const { startIndex, endIndex, isPicked } = this.sections[Id]
-            !isPicked &&  this._fillSegmentByColor(startIndex, endIndex, COLOR_TUNNEL_FOCUS)
+
+        this._currentSectionIdFocus = null
+
+        if (result?.typeItem === Section.typeItem) {
+            if (this._currentSectionIdFocus !== result.Id) {
+                this._currentSectionIdFocus = result.Id
+                const { startIndex, endIndex, isPicked } = this.sections[result.Id]
+                !isPicked &&  this._fillSegmentByColor(startIndex, endIndex, COLOR_TUNNEL_FOCUS)
+            }
         }
-        this._currentSectionIdFocus = Id
     }
 
-    setCurrentSectorPicked (Id: number | null) {
-        if (this._currentSectionIdPicked !== null) {
+    setCurrentItemPicked (typeItem: string | null, Id: number | null) {
+        if (!this.mesh) return
+
+        if (!this.nodeLabelPicked) {
+            this.nodeLabelPicked = new THREE.Mesh(
+                new THREE.SphereGeometry(TUNNEL_RADIUS * 1.5, 32, 32),
+                new THREE.MeshPhongMaterial({
+                    ...TUNNEL_MATERIAL_PROPS,
+                    color: 0x0000FF,
+                })
+            )
+            this.mesh.add(this.nodeLabelPicked)
+        }
+
+        // очистить текущую секцию
+        if (this._currentSectionIdPicked) {
             this.sections[this._currentSectionIdPicked].isPicked = false
             this._fillSegmentByColor(
                 this.sections[this._currentSectionIdPicked].startIndex, 
                 this.sections[this._currentSectionIdPicked].endIndex, 
                 this.sections[this._currentSectionIdPicked].currentColor
-            )  
+            )
+            this._currentSectionIdPicked = null  
+        } 
+
+        // очистить текущюю ноду
+        this.nodeLabelPicked.visible = false
+
+        // показать ноду
+        if (typeItem === Node.typeItem && Id) {
+            this.nodeLabelPicked.visible = true
+            const node = this.nodes[Id]
+            const { pos } = node            
+            this.nodeLabelPicked.position.set(...pos)
         }
-        this._currentSectionIdPicked = Id
-        if (!Id) {
-            return;
+
+        // показать секцию
+        if (typeItem === Section.typeItem && Id) {
+            this.sections[Id].isPicked = true
+            this._fillSegmentByColor(this.sections[Id].startIndex, this.sections[Id].endIndex, COLOR_TUNNEL_PICKED)
+            this._currentSectionIdPicked = Id
         }
-        this.sections[Id].isPicked = true
-        this._fillSegmentByColor(this.sections[Id].startIndex, this.sections[Id].endIndex, COLOR_TUNNEL_PICKED)
+
     }
 
     highlightSections (sectionsIds: number[]) {

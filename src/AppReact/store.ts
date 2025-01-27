@@ -2,7 +2,8 @@ import { configureStore } from '@reduxjs/toolkit'
 
 interface AppState {
     isShowComponentLoader: boolean
-    сurrentSectorId: number | null
+    сurrentItemId: number | null
+    сurrentItemType: string | null
     buttonsHorizons: string[]
     currentButtonHorizon: string
     bottomInfo: string | null
@@ -10,7 +11,7 @@ interface AppState {
 
 export const TYPES_ACTIONS = {
     SHOW_APPLICATION: 'SHOW_APPLICATION',
-    SET_CURRENT_SECTOR_ID: 'SET_CURRENT_SECTOR_ID',
+    SET_CURRENT_ITEM: 'SET_CURRENT_ITEM',
     SET_VALUE_POPUP_COORDS: 'SET_VALUE_POPUP_COORDS',
     SET_BUTTONS_HORIZONS: 'SET_BUTTONS_MINES',
     SET_CURRENT_BUTTON_HORIZON: 'SET_CURRENT_BUTTON_HORIZON',
@@ -24,7 +25,8 @@ type AppAction = {
 
 const appStartState: AppState = {
     isShowComponentLoader: true,
-    сurrentSectorId: null,
+    сurrentItemId: null,
+    сurrentItemType: null,
     buttonsHorizons: [],
     currentButtonHorizon: 'X',
     bottomInfo: null,
@@ -38,10 +40,11 @@ const reducerThreeUI = (state: AppState = appStartState, action: AppAction) => {
         })
     }
 
-    if (action.type === TYPES_ACTIONS.SET_CURRENT_SECTOR_ID) {
+    if (action.type === TYPES_ACTIONS.SET_CURRENT_ITEM) {
         return ({
             ...state,
-            сurrentSectorId: action.text,
+            сurrentItemId: action.Id,
+            сurrentItemType: action.typeItem,
         })
     }
 

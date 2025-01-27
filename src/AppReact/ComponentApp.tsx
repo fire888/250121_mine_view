@@ -18,7 +18,8 @@ const mapStateToProps = (state: RootState) => {
     return {
         isShowComponentLoader: state.threeUI.isShowComponentLoader,
         currentHorizon: state.threeUI.currentButtonHorizon,
-        сurrentSectorId: state.threeUI.сurrentSectorId,
+        сurrentItemId: state.threeUI.сurrentItemId,
+        сurrentItemType: state.threeUI.сurrentItemType,
         bottomInfo: state.threeUI.bottomInfo
     }
 }
@@ -26,8 +27,8 @@ const mapStateToProps = (state: RootState) => {
 const mapDispatchToProps = (dispatch: Dispatch) => ({
     showApplication: () => 
         dispatch({ type: TYPES_ACTIONS.SHOW_APPLICATION }),
-    setCurrentSectorId: (text: number | null) =>
-        dispatch({ type: TYPES_ACTIONS.SET_CURRENT_SECTOR_ID, text }),
+    setCurrentItem: (typeItem: string | null, Id: number | null = null) =>
+        dispatch({ type: TYPES_ACTIONS.SET_CURRENT_ITEM, typeItem, Id }),
     setHorizonsNames: (horizonsNames: string[]) =>
         dispatch({ type: TYPES_ACTIONS.SET_BUTTONS_HORIZONS, value: horizonsNames }),
     showBottomSectorInfo: (text: string | null) =>
@@ -59,7 +60,13 @@ const App: React.FC<PropsFromRedux> = (props) => {
             // Настраиваем 3D-сцену и вешаем коллбэки на взаимодействие с ней
             viewer.setGraph(graph)
             await viewer.build()
-            viewer.onMouseOver(props.setCurrentSectorId)
+            viewer.onMouseOver(e => {
+                if (e === null) {
+                    props.setCurrentItem(null)
+                    return;
+                } 
+                props.setCurrentItem(e.typeItem, e.Id)
+            })
             viewer.appendParentDomContainer(threeViewerWrapperRef.current)
 
             // Подготавливаем интерфейс: скрываем лоадер и показываем приложение
@@ -68,7 +75,7 @@ const App: React.FC<PropsFromRedux> = (props) => {
         }
         initAllApplication().then()
 
-    }, [props.setCurrentSectorId])
+    }, [props.setCurrentItem])
 
     // Эффект для подсветки текущих Секторов Горизонта в 3D-вьювере
     useEffect(() => {
@@ -92,7 +99,7 @@ const App: React.FC<PropsFromRedux> = (props) => {
 
             if (Date.now() - time > 200) return;
 
-            const bottomInfo = viewerRef.current.graph.getSectionData(props.сurrentSectorId)
+            const bottomInfo = viewerRef.current.graph.getItemData(props.сurrentItemType, props.сurrentItemId)
             props.showBottomSectorInfo(bottomInfo)
         }
         threeViewerWrapperRef.current.addEventListener('pointerdown', handleDown)
@@ -103,14 +110,19 @@ const App: React.FC<PropsFromRedux> = (props) => {
             threeViewerWrapperRef.current.removeEventListener('pointerdown', handleDown)
             threeViewerWrapperRef.current.removeEventListener('pointerup', handleUp)
         }
-    }, [props.сurrentSectorId])
+    }, [props.сurrentItemId, props.сurrentItemType])
 
     // Эффект для очистки окраса в синий
     useEffect(() => {
         if (!viewerRef.current) { 
             return;
         }
-        viewerRef.current.setCurrentSectorPicked(props.bottomInfo ? props.сurrentSectorId : null)
+        if (props.bottomInfo) {
+            viewerRef.current.setCurrentItemPicked(props.сurrentItemType, props.сurrentItemId)
+        } else {
+            viewerRef.current.setCurrentItemPicked(null)
+        }
+
     }, [props.bottomInfo])
 
     return (

@@ -191,20 +191,38 @@ export class Graph {
         return horizon.Sections;
     }
 
-    getSectionData (sectionId: number | null) {
-        if (!sectionId) {
+    getItemData (typeItem: string | null, Id: number | null = null): string | null {
+        if (!typeItem) {
             return null;
         }
-        const section = this.Sections[sectionId]
-        if (!section) {
-            return null
+        if (typeItem === "Section" && Id) {
+            const e = this.Sections[Id]
+            if (!e) {
+                return null;
+            }
+            return (
+                `Section: ${e.Id}, ` +
+                `StartNodeId: ${e.StartNodeId}, ` +
+                `EndNodeId: ${e.EndNodeId}, ` + 
+                `Thickness: ${e.Thickness}, ` + 
+                `Guid: ${e.Guid}`
+            )
         }
-        return (
-            `Section: ${section.Id}, ` +
-            `StartNodeId: ${section.StartNodeId}, ` +
-            `EndNodeId: ${section.EndNodeId}, ` + 
-            `Thickness: ${section.Thickness}, ` + 
-            `Guid: ${section.Guid}`
-        )
+
+        if (typeItem === "Node" && Id) {
+            const e = this.Nodes[Id]
+            if (!e) {
+                return null;
+            }
+            return (
+                `Node: ${e.Id}, ` +
+                `X: ${e.X}, ` +
+                `Y: ${e.Y}, ` + 
+                `Z: ${e.Z}, ` + 
+                `Guid: ${e.Guid}`
+            )
+        }
+
+        return null;
     }
 }

@@ -8,7 +8,7 @@ export class ThreeViewer {
     graph: Graph | null = null
     private _studio: Studio | null = null
     private _meshBuilder: MeshBuilder | null = null
-    private _cbOnMouseOverElement: (val: number | null) => void = () => {}
+    private _cbOnMouseOverElement: (val: { Id: number, typeItem: string } | null) => void = () => {}
 
     async build() {
         const ticker = new Ticker()
@@ -29,11 +29,11 @@ export class ThreeViewer {
 
         // Коллбэк при наведении мыши
         this._studio.setMeshForMouseOver(this._meshBuilder.getMeshesForClick())
-        this._studio.setCbOnMouseOver((Id: number | null): void => {
+        this._studio.setCbOnMouseOver((result: { Id: number, typeItem: string } | null): void => {
             if (!this._meshBuilder) return;
             
-            this._meshBuilder.focusOn(Id)
-            this._cbOnMouseOverElement(Id)
+            this._meshBuilder.focusOn(result)
+            this._cbOnMouseOverElement(result)
         })
 
         const { xCenter, yCenter, zCenter, zMax, zW } = this._meshBuilder
@@ -57,9 +57,9 @@ export class ThreeViewer {
         this.graph = graph
     }
 
-    setCurrentSectorPicked (Id: number | null) {
+    setCurrentItemPicked (typeItem: string | null, Id: number | null = null) {
         if (!this._meshBuilder) return;
-        this._meshBuilder.setCurrentSectorPicked(Id)
+        this._meshBuilder.setCurrentItemPicked(typeItem, Id)
     }
 
     setCurrentHorizonName(horizonName: string) {
@@ -76,7 +76,7 @@ export class ThreeViewer {
         this._studio.setDomParent(domContainer)
     }
 
-    onMouseOver (cb: (val: number | null) => void) {
+    onMouseOver (cb: (val: { Id: number, typeItem: string } | null) => void) {
         this._cbOnMouseOverElement = cb
     }
 }
