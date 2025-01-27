@@ -1,4 +1,4 @@
-import './ComponentPopupInfo.css'
+import './stylesheets/ComponentPopupInfo.css'
 import React, { useState, useEffect } from 'react'
 import { connect, ConnectedProps } from 'react-redux'
 import { RootState } from './store'

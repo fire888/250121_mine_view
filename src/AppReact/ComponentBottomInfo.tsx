@@ -1,8 +1,7 @@
-import './ComponentBottomInfo.css'
+import './stylesheets/ComponentBottomInfo.css'
 import { connect, ConnectedProps } from 'react-redux'
 import { RootState, TYPES_ACTIONS } from './store'
 import { Dispatch } from 'redux'
-
 
 const mapStateToProps = (state: RootState) => {
     return {

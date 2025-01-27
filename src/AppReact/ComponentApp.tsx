@@ -1,4 +1,4 @@
-import './ComponentApp.css'
+import './stylesheets/ComponentApp.css'
 import ComponentLoader from './ComponentLoader.tsx'
 import ComponentPopupInfo from './ComponentPopupInfo.tsx'
 import ComponentHorizonsList from './ComponentHorizonsList.tsx'
@@ -25,7 +25,7 @@ const mapStateToProps = (state: RootState) => {
 }
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
-    showApplication: () => 
+    showApplication: () =>
         dispatch({ type: TYPES_ACTIONS.SHOW_APPLICATION }),
     setCurrentItem: (typeItem: string | null, Id: number | null = null) =>
         dispatch({ type: TYPES_ACTIONS.SET_CURRENT_ITEM, typeItem, Id }),
@@ -45,7 +45,7 @@ const App: React.FC<PropsFromRedux> = (props) => {
 
     // Инициализация приложения при первом рендере один раз
     useEffect(() => {
-        if (viewerRef.current) { 
+        if (viewerRef.current) {
             return;
         }
         const viewer = new ThreeViewer()
@@ -64,7 +64,7 @@ const App: React.FC<PropsFromRedux> = (props) => {
                 if (e === null) {
                     props.setCurrentItem(null)
                     return;
-                } 
+                }
                 props.setCurrentItem(e.typeItem, e.Id)
             })
             viewer.appendParentDomContainer(threeViewerWrapperRef.current)
@@ -79,7 +79,7 @@ const App: React.FC<PropsFromRedux> = (props) => {
 
     // Эффект для подсветки текущих Секторов Горизонта в 3D-вьювере
     useEffect(() => {
-        if (!viewerRef.current) { 
+        if (!viewerRef.current) {
             return;
         }
         viewerRef.current.setCurrentHorizonName(props.currentHorizon)
@@ -92,7 +92,7 @@ const App: React.FC<PropsFromRedux> = (props) => {
         let time = Date.now()
         const handleDown = () => {
             time = Date.now()
-        } 
+        }
 
         const handleUp = () => {
             if (!viewerRef.current || !viewerRef.current.graph) return;
@@ -114,7 +114,7 @@ const App: React.FC<PropsFromRedux> = (props) => {
 
     // Эффект для очистки окраса в синий
     useEffect(() => {
-        if (!viewerRef.current) { 
+        if (!viewerRef.current) {
             return;
         }
         if (props.bottomInfo) {
@@ -122,7 +122,6 @@ const App: React.FC<PropsFromRedux> = (props) => {
         } else {
             viewerRef.current.setCurrentItemPicked(null)
         }
-
     }, [props.bottomInfo])
 
     return (

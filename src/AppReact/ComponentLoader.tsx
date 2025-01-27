@@ -1,4 +1,4 @@
-import './ComponentLoader.css'
+import './stylesheets/ComponentLoader.css'
 
 const ComponentLoader = () => {
     return (

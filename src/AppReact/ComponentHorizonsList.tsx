@@ -1,4 +1,4 @@
-import './ComponentHorisonsList.css'
+import './stylesheets/ComponentHorisonsList.css'
 import { connect, ConnectedProps } from 'react-redux'
 import { Dispatch } from 'redux'
 import { TYPES_ACTIONS } from './store'
